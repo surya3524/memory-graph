@@ -63,12 +63,26 @@ Storage:        JSON (no database required for POC)
 
 ## Getting Started
 
+**1. Install dependencies**
 ```bash
-pip install networkx streamlit anthropic
-
-# Run the sample client loader
-python sample_clients.py
+pip install -r requirements.txt
 ```
+
+**2. Set up your API key** *(only needed for the Note Encoder tab)*
+```bash
+cp .env.example .env
+# Open .env and paste your key from https://console.anthropic.com
+```
+
+**3. Run the dashboard**
+```bash
+ANTHROPIC_API_KEY=$(grep ANTHROPIC_API_KEY .env | cut -d= -f2) streamlit run dashboard.py
+```
+
+The Market Alerts, Client Graph, and Memory Timeline tabs work with **no API key**.
+The Note Encoder tab uses Claude to parse meeting notes — that's the only part that needs one.
+
+> **Cost:** encoding one meeting note costs less than $0.01. A full demo day is under $1.
 
 ## Project Structure
 
