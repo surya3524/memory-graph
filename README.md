@@ -39,9 +39,24 @@ When volatility hits, the system surfaces: *who to call, why, and exactly what t
 | Priya N. | DIY Defector | Portfolio underperforms S&P by >2% |
 
 Archetypes are grounded in behavioral finance research:
-- Dalbar QAIB (annual investor behavior report)
-- Morningstar "Mind the Gap" (2023)
-- Vanguard Advisor's Alpha (2022)
+
+- **Vanguard Advisor's Alpha (2022)**
+  *"Putting a value on your value: Quantifying Vanguard Advisor's Alpha"*
+  Francis M. Kinniry Jr., Colleen M. Jaconetti, Michael A. DiJoseph, David J. Walker, Maria C. Quinn — The Vanguard Group, 2022.
+  Key finding: An advisor acting as a behavioral coach adds ~150 basis points of net value annually.
+  [Full paper (PDF)](https://workplace.vanguard.com/content/dam/inst/iig-transformation/insights/pdf/2022/advisor-alpha-quantifying-the-value-of-a-financial-professional.pdf)
+
+- **Dalbar QAIB — 30th Annual Edition (2024)**
+  *"Quantitative Analysis of Investor Behavior"*
+  Dalbar, Inc., released April 11, 2024.
+  Key finding: The average equity investor earned 20.79% in 2023 vs. the S&P 500's 26.29% — a 5.5% underperformance gap driven by behavioral timing mistakes.
+  [dalbar.com/qaib](https://www.dalbar.com/qaib/)
+
+- **Morningstar "Mind the Gap" (2023)**
+  *"Mind the Gap 2023: A Report on Investor Returns Around the World"*
+  Morningstar, Inc., covering 10 years ended December 31, 2023.
+  Key finding: Investors captured only ~85% of their funds' total returns — losing ~15% due to poor timing of buy/sell decisions (behavior gap of ~1% per year).
+  [Full report](https://www.morningstar.com/en-uk/business/insights/research/mind-the-gap)
 
 ## Ethical Design
 
