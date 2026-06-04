@@ -2,3 +2,4 @@ networkx>=3.0
 streamlit>=1.35
 matplotlib>=3.8
 anthropic>=0.30
+pyvis>=0.3.2

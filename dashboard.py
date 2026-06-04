@@ -3,12 +3,15 @@ Streamlit Advisor Dashboard — Client Financial Memory Graph
 Run with: streamlit run dashboard.py
 """
 
+import json
 import streamlit as st
+import streamlit.components.v1 as components
 import networkx as nx
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
+from pyvis.network import Network
 from datetime import datetime, timezone
 
 from graph_engine import build_graph, get_client_subgraph, get_client_timeline, graph_summary
@@ -75,6 +78,73 @@ ACTION_BADGE = {
     "GENTLE CHECK-IN":          ("🟢", "#1A7A3A"),
     "MONITOR":                  ("🟢", "#1A7A3A"),
 }
+
+def build_pyvis_graph(sub: nx.DiGraph) -> Network:
+    net = Network(height="600px", width="100%", directed=True, bgcolor="#F5F7FA")
+    net.set_options(json.dumps({
+        "physics": {
+            "forceAtlas2Based": {
+                "gravitationalConstant": -60,
+                "centralGravity": 0.005,
+                "springLength": 180,
+                "springConstant": 0.08,
+                "damping": 0.4,
+                "avoidOverlap": 0.5,
+            },
+            "solver": "forceAtlas2Based",
+            "stabilization": {"enabled": True, "iterations": 200},
+        },
+        "edges": {
+            "smooth": {"type": "dynamic"},
+            "font": {"size": 10, "color": "#44546A", "strokeWidth": 2, "strokeColor": "white"},
+        },
+        "interaction": {
+            "hover": True,
+            "tooltipDelay": 80,
+            "zoomView": True,
+            "dragView": True,
+            "navigationButtons": True,
+        },
+    }))
+
+    for node_id in sub.nodes():
+        data   = sub.nodes[node_id]
+        kind   = data.get("kind", "belief")
+        color  = NODE_COLORS.get(kind, "#888")
+        is_hub = kind == "client"
+        label  = data.get("name", node_id) if is_hub else data.get("label", node_id.split("__")[-1]).replace("_", " ")
+
+        lines = [f"<b>{label}</b>", f"<i>{kind}</i>"]
+        if data.get("date"):
+            lines.append(f"📅 {data['date']}")
+        if data.get("summary"):
+            lines.append(data["summary"])
+
+        net.add_node(
+            node_id,
+            label=label,
+            size=34 if is_hub else 20,
+            color={"background": color, "border": color,
+                   "highlight": {"background": color, "border": "#C8A034"}},
+            title="<br>".join(lines),
+            font={"color": "white", "size": 12 if is_hub else 10, "bold": True},
+        )
+
+    for u, v, d in sub.edges(data=True):
+        relation = d.get("relation", "")
+        is_has   = relation == "HAS"
+        net.add_edge(
+            u, v,
+            label="" if is_has else relation,
+            color={"color": "#C8A034", "opacity": 0.35 if is_has else 0.85},
+            width=1 if is_has else 2,
+            arrows="to",
+            font={"size": 9, "color": "#44546A", "strokeWidth": 2, "strokeColor": "white"},
+            dashes=is_has,
+        )
+
+    return net
+
 
 @st.cache_resource
 def load_graph():
@@ -189,56 +259,9 @@ with tab2:
 
     sub = get_client_subgraph(G, selected_id)
 
-    fig, ax = plt.subplots(figsize=(14, 7))
-    ax.set_facecolor("#F5F7FA")
-    fig.patch.set_facecolor("#F5F7FA")
-
-    pos = nx.spring_layout(sub, seed=42, k=2.5)
-
-    node_colors = [
-        NODE_COLORS.get(sub.nodes[n].get("kind", "belief"), "#888")
-        for n in sub.nodes()
-    ]
-    node_sizes = [
-        1800 if sub.nodes[n].get("kind") == "client" else 900
-        for n in sub.nodes()
-    ]
-
-    nx.draw_networkx_nodes(sub, pos, ax=ax,
-        node_color=node_colors, node_size=node_sizes, alpha=0.92)
-
-    nx.draw_networkx_edges(sub, pos, ax=ax,
-        edge_color="#C8A034", arrows=True,
-        arrowsize=18, width=1.5, alpha=0.7,
-        connectionstyle="arc3,rad=0.08")
-
-    labels = {}
-    for n in sub.nodes():
-        d = sub.nodes[n]
-        if d.get("kind") == "client":
-            labels[n] = d.get("name", n)
-        else:
-            raw = d.get("label", n.split("__")[-1])
-            labels[n] = raw.replace("_", "\n")
-
-    nx.draw_networkx_labels(sub, pos, labels=labels, ax=ax,
-        font_size=7, font_color="white", font_weight="bold")
-
-    edge_labels = {(u, v): d.get("relation", "")
-                   for u, v, d in sub.edges(data=True) if d.get("relation") != "HAS"}
-    nx.draw_networkx_edge_labels(sub, pos, edge_labels=edge_labels, ax=ax,
-        font_size=6.5, font_color="#64748B",
-        bbox=dict(boxstyle="round,pad=0.2", fc="white", alpha=0.7))
-
-    legend = [mpatches.Patch(color=c, label=k) for k, c in NODE_COLORS.items()]
-    ax.legend(handles=legend, loc="lower left", fontsize=9,
-              framealpha=0.9, edgecolor="#ddd")
-    ax.axis("off")
-    ax.set_title(f"{selected_name} — Belief & Event Memory Graph",
-                 fontsize=14, color="#003087", fontweight="bold", pad=15)
-    plt.tight_layout()
-    st.pyplot(fig)
-    plt.close()
+    net  = build_pyvis_graph(sub)
+    html = net.generate_html(notebook=False)
+    components.html(html, height=620, scrolling=False)
 
     st.divider()
     st.markdown("**Graph statistics for this client**")
