@@ -9,7 +9,7 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
-from datetime import datetime
+from datetime import datetime, timezone
 
 from graph_engine import build_graph, get_client_subgraph, get_client_timeline, graph_summary
 from trigger import MARKET_SCENARIOS, run_trigger, ACTION_COLORS
@@ -85,10 +85,23 @@ summary = graph_summary(G)
 client_lookup = {c["id"]: c for c in CLIENTS}
 
 # ── Sidebar ───────────────────────────────────────────────────────────────────
+VERSION = "v0.1.0"
+DEPLOYED = "2026-06-03"
+
 with st.sidebar:
-    st.image("https://upload.wikimedia.org/wikipedia/commons/thumb/b/b9/Raymond_James_Financial_logo.svg/320px-Raymond_James_Financial_logo.svg.png", width=180)
+    st.markdown(
+        "<div style='background:#003087;padding:14px 16px;border-radius:8px;margin-bottom:8px'>"
+        "<span style='color:#C8A034;font-size:20px;font-weight:800;letter-spacing:1px'>RAYMOND JAMES</span><br>"
+        "<span style='color:#FFFFFF;font-size:11px;letter-spacing:2px'>FINANCIAL SERVICES</span>"
+        "</div>",
+        unsafe_allow_html=True,
+    )
     st.markdown("## Client Memory Graph")
     st.caption("Advisor Intelligence POC · RJ Engineering Challenge 2026")
+    st.markdown(
+        f"<span style='font-size:11px;color:#94A3B8'>{VERSION} &nbsp;·&nbsp; Deployed {DEPLOYED}</span>",
+        unsafe_allow_html=True,
+    )
     st.divider()
 
     col1, col2, col3 = st.columns(3)
