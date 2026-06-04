@@ -1,6 +1,7 @@
 # Client Financial Memory Graph
 
-🚀 **Live Demo:** [memorygraphforfas.streamlit.app](https://memorygraphforfas.streamlit.app)
+🚀 **Live Demo (stable):** [memorygraphforfas.streamlit.app](https://memorygraphforfas.streamlit.app)
+🧪 **Live Demo (interactive graph):** [memory-graph-v2.streamlit.app](https://memory-graph-v2.streamlit.app)
 
 > A living, structured memory layer for every advisor–client relationship —  
 > built for the Raymond James Engineering Challenge 2026.
