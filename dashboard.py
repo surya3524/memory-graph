@@ -123,11 +123,13 @@ def build_pyvis_graph(sub: nx.DiGraph) -> Network:
         net.add_node(
             node_id,
             label=label,
+            shape="ellipse",
             size=34 if is_hub else 20,
             color={"background": color, "border": color,
                    "highlight": {"background": color, "border": "#C8A034"}},
             title="<br>".join(lines),
-            font={"color": "white", "size": 12 if is_hub else 10, "bold": True},
+            font={"color": "white", "size": 13 if is_hub else 11, "bold": True},
+            widthConstraint={"minimum": 90, "maximum": 130} if is_hub else {"minimum": 70, "maximum": 110},
         )
 
     for u, v, d in sub.edges(data=True):
