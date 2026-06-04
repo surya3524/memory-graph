@@ -101,10 +101,10 @@ def print_encoded(client_name: str, date: str, note: str):
 
 if __name__ == "__main__":
     sample_note = (
-        "Client called today very anxious about the market drop. "
+        "Client called today very concerned about the market drop. "
         "Said he's been watching CNBC all morning and is thinking about moving "
         "to cash. Reminded him of his 2020 experience. He paused and said "
-        "'You're right, I did this before and regretted it.' "
+        "'You're right, I did this before and wished I had stayed the course.' "
         "Agreed to hold for now but wants a call if it drops another 3%."
     )
 

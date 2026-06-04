@@ -9,23 +9,23 @@ CLIENTS = [
         "id": "john_m",
         "name": "John M.",
         "age": 58,
-        "archetype": "Regretful Seller",
+        "archetype": "Reflective Seller",
         "alert_priority": 1,
         "trigger_conditions": ["market_drop_5pct", "market_drop_10pct"],
         "meetings": [
             {
                 "date": "2020-03-18",
-                "note": "Client called in distress. Markets down 30% from peak. "
+                "note": "Client called with concerns. Markets down 30% from peak. "
                         "Requested to move all equity positions to cash immediately. "
                         "Advisor counseled against it. Client insisted.",
                 "nodes": [
-                    {"type": "emotion", "label": "high_anxiety_under_drawdown"},
+                    {"type": "emotion", "label": "heightened_concern_under_drawdown"},
                     {"type": "action",  "label": "sold_100pct_equities"},
                     {"type": "event",   "label": "covid_market_crash_mar2020"},
                 ],
                 "edges": [
                     ("sold_100pct_equities", "TRIGGERED_BY", "covid_market_crash_mar2020"),
-                    ("high_anxiety_under_drawdown", "LED_TO", "sold_100pct_equities"),
+                    ("heightened_concern_under_drawdown", "LED_TO", "sold_100pct_equities"),
                 ],
             },
             {
@@ -34,11 +34,11 @@ CLIENTS = [
                         "Said selling in March was his biggest financial mistake. "
                         "Asked how to avoid repeating it. Agreed to a volatility plan.",
                 "nodes": [
-                    {"type": "belief", "label": "regrets_march_2020_sale"},
+                    {"type": "belief", "label": "reflected_on_march_2020_sale"},
                     {"type": "belief", "label": "wants_behavioral_guardrails"},
                 ],
                 "edges": [
-                    ("regrets_march_2020_sale", "REFLECTS_ON", "sold_100pct_equities"),
+                    ("reflected_on_march_2020_sale", "REFLECTS_ON", "sold_100pct_equities"),
                 ],
             },
             {
@@ -47,12 +47,12 @@ CLIENTS = [
                         "Referenced 2020 unprompted — said he did not want to repeat it. "
                         "Held position. No action taken.",
                 "nodes": [
-                    {"type": "emotion", "label": "anxiety_resurfaced_2022"},
+                    {"type": "emotion", "label": "caution_resurfaced_2022"},
                     {"type": "action",  "label": "held_position_2022"},
                 ],
                 "edges": [
-                    ("anxiety_resurfaced_2022", "CONTAINED_BY", "regrets_march_2020_sale"),
-                    ("held_position_2022", "INFORMED_BY", "regrets_march_2020_sale"),
+                    ("caution_resurfaced_2022", "CONTAINED_BY", "reflected_on_march_2020_sale"),
+                    ("held_position_2022", "INFORMED_BY", "reflected_on_march_2020_sale"),
                 ],
             },
             {
@@ -64,7 +64,7 @@ CLIENTS = [
                     {"type": "belief", "label": "explicitly_requested_proactive_outreach"},
                 ],
                 "edges": [
-                    ("explicitly_requested_proactive_outreach", "EVOLVED_FROM", "regrets_march_2020_sale"),
+                    ("explicitly_requested_proactive_outreach", "EVOLVED_FROM", "reflected_on_march_2020_sale"),
                 ],
             },
         ],
@@ -336,13 +336,13 @@ CLIENTS = [
                         "Wants 25% in gold ETF, 5% in silver. Reads Austrian economics. "
                         "Mentioned she also has physical gold stored at home — amount unspecified.",
                 "nodes": [
-                    {"type": "belief", "label": "inflation_fear_monetary_debasement"},
+                    {"type": "belief", "label": "inflation_protection_thesis"},
                     {"type": "belief", "label": "gold_as_primary_store_of_value"},
                     {"type": "action", "label": "25pct_gold_etf_5pct_silver_allocation"},
                     {"type": "belief", "label": "holds_undisclosed_physical_gold"},
                 ],
                 "edges": [
-                    ("25pct_gold_etf_5pct_silver_allocation", "DRIVEN_BY", "inflation_fear_monetary_debasement"),
+                    ("25pct_gold_etf_5pct_silver_allocation", "DRIVEN_BY", "inflation_protection_thesis"),
                     ("holds_undisclosed_physical_gold", "REFLECTS", "gold_as_primary_store_of_value"),
                 ],
             },
@@ -407,14 +407,14 @@ CLIENTS = [
                         "My mother ran out of money at 82. I think about that a lot.'",
                 "nodes": [
                     {"type": "belief", "label": "jim_retirement_ready_optimistic"},
-                    {"type": "belief", "label": "carol_sequence_of_returns_anxiety"},
+                    {"type": "belief", "label": "carol_sequence_of_returns_concern"},
                     {"type": "belief", "label": "carol_anchored_to_mothers_experience"},
                     {"type": "belief", "label": "carol_working_for_healthcare_not_just_income"},
                 ],
                 "edges": [
-                    ("carol_sequence_of_returns_anxiety", "ROOTED_IN", "carol_anchored_to_mothers_experience"),
-                    ("carol_working_for_healthcare_not_just_income", "DRIVEN_BY", "carol_sequence_of_returns_anxiety"),
-                    ("jim_retirement_ready_optimistic", "TENSION_WITH", "carol_sequence_of_returns_anxiety"),
+                    ("carol_sequence_of_returns_concern", "ROOTED_IN", "carol_anchored_to_mothers_experience"),
+                    ("carol_working_for_healthcare_not_just_income", "DRIVEN_BY", "carol_sequence_of_returns_concern"),
+                    ("jim_retirement_ready_optimistic", "TENSION_WITH", "carol_sequence_of_returns_concern"),
                 ],
             },
             {
@@ -429,7 +429,7 @@ CLIENTS = [
                 ],
                 "edges": [
                     ("couple_divergence_requires_separate_conversations", "REFLECTS", "jim_retirement_ready_optimistic"),
-                    ("carol_needs_downside_scenario_plan_documented", "EVOLVES_FROM", "carol_sequence_of_returns_anxiety"),
+                    ("carol_needs_downside_scenario_plan_documented", "EVOLVES_FROM", "carol_sequence_of_returns_concern"),
                 ],
             },
         ],
@@ -438,7 +438,7 @@ CLIENTS = [
             "action": "CALL CAROL FIRST, THEN JIM",
             "context": (
                 "Carol and Jim have meaningfully different risk outlooks. "
-                "Carol's anxiety is anchored to her mother's experience running out of money. "
+                "Carol's caution is anchored to her mother's experience running out of money. "
                 "Jim is optimistic and ready to stop working. "
                 "A market event will affect them differently — Carol needs reassurance, Jim needs reframing."
             ),

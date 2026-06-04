@@ -173,7 +173,7 @@ with st.sidebar:
     st.markdown("## Client Memory Graph")
     st.caption("Advisor Intelligence POC · RJ Engineering Challenge 2026")
     st.markdown(
-        f"<span style='font-size:11px;color:#94A3B8'>{VERSION} &nbsp;·&nbsp; Deployed {DEPLOYED}</span>",
+        f"<span style='font-size:11px;color:#94A3B8'>{VERSION} &nbsp;·&nbsp; Last deployed: {DEPLOYED}</span>",
         unsafe_allow_html=True,
     )
     st.divider()
@@ -265,6 +265,12 @@ with tab2:
 
     net  = build_pyvis_graph(sub)
     html = net.generate_html(notebook=False)
+    html = html.replace(
+        "network = new vis.Network(container, data, options);",
+        "network = new vis.Network(container, data, options);\n"
+        "network.once('stabilizationIterationsDone', function() {"
+        " network.setOptions({ physics: { enabled: false } }); });",
+    )
     components.html(html, height=620, scrolling=False)
 
     st.divider()
@@ -332,9 +338,9 @@ with tab4:
             "Paste meeting notes here",
             height=220,
             placeholder=(
-                "e.g. Client called today concerned about the market. "
+                "e.g. Client called today with concerns about the market. "
                 "Said he's thinking about moving to cash. "
-                "Referenced his 2020 experience and said he regretted selling then..."
+                "Referenced his 2020 experience and said he wished he had stayed the course..."
             ),
         )
         run_btn = st.button("Extract Memory Nodes", type="primary", use_container_width=True)
