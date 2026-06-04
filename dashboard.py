@@ -4,6 +4,7 @@ Run with: streamlit run dashboard.py
 """
 
 import json
+import os
 import streamlit as st
 import streamlit.components.v1 as components
 import networkx as nx
@@ -157,8 +158,9 @@ summary = graph_summary(G)
 client_lookup = {c["id"]: c for c in CLIENTS}
 
 # ── Sidebar ───────────────────────────────────────────────────────────────────
-VERSION = "v0.1.0"
-DEPLOYED = "2026-06-03"
+_ver     = json.load(open(os.path.join(os.path.dirname(__file__), "version.json")))
+VERSION  = _ver["version"]
+DEPLOYED = _ver["deployed"]
 
 with st.sidebar:
     st.markdown(
