@@ -9,7 +9,7 @@ CLIENTS = [
         "id": "john_m",
         "name": "John M.",
         "age": 58,
-        "archetype": "Reflective Seller",
+        "archetype": "Regretful Seller",
         "alert_priority": 1,
         "trigger_conditions": ["market_drop_5pct", "market_drop_10pct"],
         "meetings": [
@@ -34,11 +34,11 @@ CLIENTS = [
                         "Said selling in March was his biggest financial mistake. "
                         "Asked how to avoid repeating it. Agreed to a volatility plan.",
                 "nodes": [
-                    {"type": "belief", "label": "reflected_on_march_2020_sale"},
+                    {"type": "belief", "label": "regrets_march_2020_sale"},
                     {"type": "belief", "label": "wants_behavioral_guardrails"},
                 ],
                 "edges": [
-                    ("reflected_on_march_2020_sale", "REFLECTS_ON", "sold_100pct_equities"),
+                    ("regrets_march_2020_sale", "REFLECTS_ON", "sold_100pct_equities"),
                 ],
             },
             {
@@ -51,8 +51,8 @@ CLIENTS = [
                     {"type": "action",  "label": "held_position_2022"},
                 ],
                 "edges": [
-                    ("caution_resurfaced_2022", "CONTAINED_BY", "reflected_on_march_2020_sale"),
-                    ("held_position_2022", "INFORMED_BY", "reflected_on_march_2020_sale"),
+                    ("caution_resurfaced_2022", "CONTAINED_BY", "regrets_march_2020_sale"),
+                    ("held_position_2022", "INFORMED_BY", "regrets_march_2020_sale"),
                 ],
             },
             {
@@ -64,7 +64,7 @@ CLIENTS = [
                     {"type": "belief", "label": "explicitly_requested_proactive_outreach"},
                 ],
                 "edges": [
-                    ("explicitly_requested_proactive_outreach", "EVOLVED_FROM", "reflected_on_march_2020_sale"),
+                    ("explicitly_requested_proactive_outreach", "EVOLVED_FROM", "regrets_march_2020_sale"),
                 ],
             },
         ],

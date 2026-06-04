@@ -340,7 +340,7 @@ with tab4:
             placeholder=(
                 "e.g. Client called today with concerns about the market. "
                 "Said he's thinking about moving to cash. "
-                "Referenced his 2020 experience and said he wished he had stayed the course..."
+                "Referenced his 2020 experience and said he regretted selling then..."
             ),
         )
         run_btn = st.button("Extract Memory Nodes", type="primary", use_container_width=True)
