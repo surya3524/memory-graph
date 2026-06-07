@@ -169,7 +169,7 @@ CLIENTS = [
         "age": 55,
         "archetype": "Sector Believer — Semiconductors",
         "alert_priority": 3,
-        "trigger_conditions": ["taiwan_strait_news", "china_export_controls", "nvda_earnings_miss", "soxx_drop_10pct"],
+        "trigger_conditions": ["taiwan_strait_news", "china_export_controls", "nvda_earnings_miss", "soxx_drop_10pct", "phlx_drop_8pct"],
         "meetings": [
             {
                 "date": "2022-01-10",

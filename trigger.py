@@ -45,6 +45,10 @@ MARKET_SCENARIOS = {
         "label": "Semiconductor ETF (SOXX) down 10%+ from recent high",
         "description": "Broad semiconductor sector drawdown.",
     },
+    "phlx_drop_8pct": {
+        "label": "PHLX Semiconductor Index (SOX) drops 8%+ in a session",
+        "description": "Single-session semiconductor sector sell-off. Export restriction or geopolitical catalyst.",
+    },
     "oil_price_drop_15pct": {
         "label": "WTI crude oil drops 15%+ in 30 days",
         "description": "Significant oil price decline. Energy sector under pressure.",

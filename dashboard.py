@@ -18,6 +18,7 @@ from datetime import datetime, timezone
 from graph_engine import build_graph, get_client_subgraph, get_client_timeline, graph_summary
 from trigger import MARKET_SCENARIOS, run_trigger, ACTION_COLORS
 from sample_clients import CLIENTS
+from simulation import MARKET_EVENT, SYSTEM_ALERT, PRE_CALL_BRIEF, CONVERSATION, CALL_OUTCOME
 
 # ── Page config ───────────────────────────────────────────────────────────────
 st.set_page_config(
@@ -199,11 +200,12 @@ with st.sidebar:
         )
 
 # ── Tabs ──────────────────────────────────────────────────────────────────────
-tab1, tab2, tab3, tab4 = st.tabs([
+tab1, tab2, tab3, tab4, tab5 = st.tabs([
     "⚡  Market Alerts",
     "🧠  Client Memory Graph",
     "📅  Memory Timeline",
     "✍️  Note Encoder",
+    "🔴  PHLX Simulation",
 ])
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -404,3 +406,164 @@ with tab4:
             4. The system generates an advisor alert for future market events
             5. Nothing is inferred — only what the client explicitly stated is encoded
             """)
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# TAB 5 — PHLX Sell-Off Simulation
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+with tab5:
+    st.markdown("## PHLX Semiconductor Sell-Off — Live Simulation")
+    st.caption("June 3, 2026 · End-to-end workflow: market event → alert → pre-call brief → advisor conversation → new graph nodes")
+
+    # ── Section 1: Market Event ──────────────────────────────────────────────
+    st.markdown("### 1  The Market Event")
+    ev = MARKET_EVENT
+    st.markdown(f"""
+    <div style="background:#1A1A2E;border-left:6px solid #CC2200;padding:18px 22px;border-radius:8px;margin-bottom:16px">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <span style="color:#FF4444;font-size:22px;font-weight:800">{ev['index']}</span>
+        <span style="color:#FF4444;font-size:32px;font-weight:900">{ev['move']}</span>
+      </div>
+      <p style="color:#94A3B8;font-size:12px;margin:4px 0">{ev['date']} · {ev['time']}</p>
+      <p style="color:#E2E8F0;margin:12px 0 0 0">{ev['catalyst']}</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+    cols = st.columns(len(ev["movers"]))
+    for col, (ticker, move, price) in zip(cols, ev["movers"]):
+        col.metric(ticker, price, move)
+
+    st.divider()
+
+    # ── Section 2: System Alert ──────────────────────────────────────────────
+    st.markdown("### 2  System Alert — Fired at 09:34 AM EST")
+    al = SYSTEM_ALERT
+    st.markdown(f"""
+    <div class="alert-card" style="border-left-color:#E05C00">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:20px;font-weight:700;color:#003087">{al['client']}</span>
+        <span style="background:#E05C00;color:white;padding:3px 14px;border-radius:12px;font-size:12px;font-weight:700">
+          🟠 {al['action']}
+        </span>
+      </div>
+      <p style="color:#64748B;font-size:13px;margin:4px 0">{al['archetype']} · Priority {al['priority']} · Trigger: <code>{al['trigger_matched']}</code></p>
+      <hr style="border-color:#eee;margin:10px 0">
+      <p style="color:#1A1A2E"><strong>Why now:</strong> {al['context']}</p>
+      <p style="color:#003087"><strong>Suggested approach:</strong> {al['suggested_approach']}</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.divider()
+
+    # ── Section 3: Pre-Call Brief ────────────────────────────────────────────
+    st.markdown("### 3  Advisor Pre-Call Brief")
+    st.caption(f"Memory graph reviewed in {PRE_CALL_BRIEF['prep_time']} · {PRE_CALL_BRIEF['graph_nodes_reviewed']} nodes surfaced")
+
+    col_a, col_b = st.columns([1, 1])
+    with col_a:
+        st.markdown("**Key beliefs to work with**")
+        for label, note in PRE_CALL_BRIEF["key_beliefs"]:
+            st.markdown(f"""
+            <div class="client-card" style="border-left:3px solid #7C3AED;margin-bottom:8px">
+              <code style="color:#7C3AED;font-size:11px">{label.replace('_',' ')}</code>
+              <p style="margin:4px 0 0 0;font-size:13px;color:#1A1A2E">{note}</p>
+            </div>
+            """, unsafe_allow_html=True)
+
+        st.markdown("**Key emotions**")
+        for label, note in PRE_CALL_BRIEF["key_emotions"]:
+            st.markdown(f"""
+            <div class="client-card" style="border-left:3px solid #B45309;margin-bottom:8px">
+              <code style="color:#B45309;font-size:11px">{label.replace('_',' ')}</code>
+              <p style="margin:4px 0 0 0;font-size:13px;color:#1A1A2E">{note}</p>
+            </div>
+            """, unsafe_allow_html=True)
+
+    with col_b:
+        st.markdown("**Household flag**")
+        st.markdown(f"""
+        <div class="client-card" style="border-left:3px solid #C8A034;background:#FFFBEB">
+          <p style="margin:0;font-size:13px;color:#1A1A2E">{PRE_CALL_BRIEF['household_flag']}</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+        st.markdown("**Open thread from last meeting**")
+        st.markdown(f"""
+        <div class="client-card" style="border-left:3px solid #003087;background:#EFF6FF">
+          <p style="margin:0;font-size:13px;color:#1A1A2E">{PRE_CALL_BRIEF['open_thread']}</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+    st.divider()
+
+    # ── Section 4: Conversation ──────────────────────────────────────────────
+    st.markdown("### 4  Advisor — Client Conversation")
+    st.caption("10:17 AM EST · Phone call · 6 minutes")
+
+    for turn in CONVERSATION:
+        is_advisor = turn["speaker"] == "Advisor"
+        bg     = "#EFF6FF" if is_advisor else "#F8FAFC"
+        border = "#003087" if is_advisor else "#64748B"
+        align  = "left"
+        label  = f"**Advisor** · {turn['time']}" if is_advisor else f"**Michael T.** · {turn['time']}"
+
+        st.markdown(f"""
+        <div style="background:{bg};border-left:4px solid {border};
+                    padding:12px 16px;border-radius:6px;margin-bottom:10px">
+          <p style="font-size:11px;color:#64748B;margin:0 0 6px 0">{label}</p>
+          <p style="margin:0;color:#1A1A2E;font-size:14px">{turn['text']}</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+        if turn["graph_note"]:
+            st.markdown(
+                f"<p style='font-size:11px;color:#7C3AED;margin:-6px 0 10px 20px'>"
+                f"📍 <em>{turn['graph_note']}</em></p>",
+                unsafe_allow_html=True,
+            )
+
+    st.divider()
+
+    # ── Section 5: Outcome + New Nodes ──────────────────────────────────────
+    st.markdown("### 5  Call Outcome + New Memory Nodes")
+    out = CALL_OUTCOME
+
+    res_color = "#065F46" if out["result"] == "SUCCESS" else "#991B1B"
+    st.markdown(f"""
+    <div class="client-card" style="border-left:5px solid {res_color}">
+      <span style="color:{res_color};font-weight:700;font-size:16px">✅ {out['result']}</span>
+      &nbsp; <span style="color:#64748B;font-size:13px">{out['duration']}</span>
+      <p style="margin:8px 0 0 0;color:#1A1A2E"><strong>Action:</strong> {out['action_taken']}</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+    col_n, col_e = st.columns([1, 1])
+    with col_n:
+        st.markdown("**New nodes added to Michael's graph**")
+        for n in out["new_nodes"]:
+            color = NODE_COLORS.get(n["type"], "#888")
+            st.markdown(
+                f'<span class="node-chip" style="background:{color}">{n["type"]}</span> '
+                f'<code style="font-size:12px">{n["label"].replace("_"," ")}</code> '
+                f'<span style="color:#94A3B8;font-size:11px">{n["date"]}</span>',
+                unsafe_allow_html=True,
+            )
+            st.markdown("")
+
+    with col_e:
+        st.markdown("**New edges**")
+        for src, rel, tgt in out["new_edges"]:
+            st.markdown(
+                f'<code style="font-size:11px">{src.replace("_"," ")}</code> '
+                f'<span style="color:#C8A034;font-weight:700"> → {rel} → </span>'
+                f'<code style="font-size:11px">{tgt.replace("_"," ")}</code>',
+                unsafe_allow_html=True,
+            )
+            st.markdown("")
+
+    st.divider()
+    st.markdown("**RSI Signal**")
+    st.markdown(f"""
+    <div class="client-card" style="border-left:4px solid #7C3AED;background:#F5F3FF">
+      <p style="margin:0;font-size:13px;color:#1A1A2E">🔁 {out['rsi_signal']}</p>
+    </div>
+    """, unsafe_allow_html=True)
