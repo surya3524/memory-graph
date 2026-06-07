@@ -19,6 +19,8 @@ from graph_engine import build_graph, get_client_subgraph, get_client_timeline, 
 from trigger import MARKET_SCENARIOS, run_trigger, ACTION_COLORS
 from sample_clients import CLIENTS
 from simulation import MARKET_EVENT, SYSTEM_ALERT, PRE_CALL_BRIEF, CONVERSATION, CALL_OUTCOME
+from real_conversation import (VOICEMAIL, ADVISOR_PREP, PHONE_CALL, FOLLOW_UP_EMAIL,
+                                TEXT_EXCHANGE, THURSDAY_MEETING, NEW_GRAPH_NODES, NEW_GRAPH_EDGES)
 
 # ── Page config ───────────────────────────────────────────────────────────────
 st.set_page_config(
@@ -200,12 +202,13 @@ with st.sidebar:
         )
 
 # ── Tabs ──────────────────────────────────────────────────────────────────────
-tab1, tab2, tab3, tab4, tab5 = st.tabs([
+tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
     "⚡  Market Alerts",
     "🧠  Client Memory Graph",
     "📅  Memory Timeline",
     "✍️  Note Encoder",
     "🔴  PHLX Simulation",
+    "🎙️  Real Conversation",
 ])
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -567,3 +570,167 @@ with tab5:
       <p style="margin:0;font-size:13px;color:#1A1A2E">🔁 {out['rsi_signal']}</p>
     </div>
     """, unsafe_allow_html=True)
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# TAB 6 — Real Conversation (PHLX Sell-Off · Full Day)
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+with tab6:
+    st.markdown("## Michael T. — Full Day · June 3, 2026")
+    st.caption("Voicemail → Phone call → Email → Text → Thursday meeting · PHLX -8.1% scenario")
+
+    st.markdown("""
+    <div style="background:#F0FDF4;border-left:4px solid #065F46;padding:12px 16px;
+                border-radius:6px;margin-bottom:20px;font-size:13px;color:#1A1A2E">
+      This tab shows how a single market event moves through a full advisor-client day.
+      Every exchange below would be encoded as new nodes in Michael's memory graph.
+    </div>
+    """, unsafe_allow_html=True)
+
+    # ── Voicemail ─────────────────────────────────────────────────────────────
+    st.markdown("### 📞 Voicemail from Michael — 9:52 AM")
+    vm = VOICEMAIL
+    st.markdown(f"""
+    <div style="background:#1A1A2E;border-radius:8px;padding:18px 22px;margin-bottom:8px">
+      <div style="display:flex;justify-content:space-between">
+        <span style="color:#94A3B8;font-size:12px">From: {vm['from']}  ·  {vm['time']}  ·  {vm['duration']}</span>
+      </div>
+      <p style="color:#E2E8F0;font-style:italic;margin:12px 0 0 0">"{vm['transcript']}"</p>
+    </div>
+    """, unsafe_allow_html=True)
+    st.markdown(f"""
+    <p style="font-size:12px;color:#7C3AED;margin:0 0 20px 4px">
+      📍 <em>Advisor read: {vm['advisor_read']}</em>
+    </p>
+    """, unsafe_allow_html=True)
+
+    # ── Advisor Prep ──────────────────────────────────────────────────────────
+    st.markdown("### 📋 Advisor Prep Notes — 10:14 AM")
+    st.caption(f"Memory graph reviewed · {ADVISOR_PREP['duration']} before calling back")
+    for note in ADVISOR_PREP["notes"]:
+        color = "#CC2200" if note.startswith("DO NOT") else (
+                "#003087" if note.startswith("KEY") or note.startswith("TARGET") or note.startswith("OPEN") else
+                "#1A1A2E")
+        st.markdown(
+            f'<p style="font-size:13px;color:{color};margin:4px 0 4px 8px">— {note}</p>',
+            unsafe_allow_html=True,
+        )
+
+    st.divider()
+
+    # ── Phone Call ────────────────────────────────────────────────────────────
+    st.markdown("### 📞 Phone Call — 10:17 AM · 9 minutes")
+
+    for turn in PHONE_CALL:
+        is_advisor = "Advisor" in turn["speaker"]
+        bg     = "#EFF6FF" if is_advisor else "#F8FAFC"
+        border = "#003087" if is_advisor else "#475569"
+        label  = f"**{turn['speaker']}** · {turn['time']}"
+
+        st.markdown(f"""
+        <div style="background:{bg};border-left:4px solid {border};
+                    padding:12px 16px;border-radius:6px;margin-bottom:6px">
+          <p style="font-size:11px;color:#64748B;margin:0 0 6px 0">{label}</p>
+          <p style="margin:0;color:#1A1A2E;font-size:14px;line-height:1.6">{turn['text']}</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+        if turn.get("subtext"):
+            st.markdown(
+                f"<p style='font-size:11px;color:#7C3AED;margin:-2px 0 10px 20px'>"
+                f"📍 <em>{turn['subtext']}</em></p>",
+                unsafe_allow_html=True,
+            )
+
+    st.divider()
+
+    # ── Follow-Up Email ───────────────────────────────────────────────────────
+    st.markdown("### ✉️ Follow-Up Email — 11:45 AM")
+    em = FOLLOW_UP_EMAIL
+    st.markdown(f"""
+    <div class="client-card" style="font-family:monospace">
+      <p style="font-size:11px;color:#64748B;margin:0">
+        <strong>From:</strong> {em['from']}<br>
+        <strong>To:</strong> {em['to']}<br>
+        <strong>Subject:</strong> {em['subject']}
+      </p>
+      <hr style="border-color:#eee;margin:10px 0">
+      <pre style="font-family:inherit;font-size:13px;color:#1A1A2E;white-space:pre-wrap;margin:0">{em['body']}</pre>
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.divider()
+
+    # ── Text Exchange ─────────────────────────────────────────────────────────
+    st.markdown("### 💬 Text Exchange — 6:14 PM")
+    st.caption("After Michael spoke to Susan at home")
+
+    for msg in TEXT_EXCHANGE:
+        is_advisor = "Advisor" in msg["from"]
+        align = "flex-end" if is_advisor else "flex-start"
+        bg    = "#003087" if is_advisor else "#E2E8F0"
+        color = "white"  if is_advisor else "#1A1A2E"
+        name  = msg["from"]
+
+        st.markdown(f"""
+        <div style="display:flex;justify-content:{align};margin-bottom:8px">
+          <div style="max-width:70%;background:{bg};color:{color};
+                      padding:10px 14px;border-radius:12px;font-size:13px">
+            <p style="font-size:10px;opacity:0.7;margin:0 0 4px 0">{name} · {msg['time']}</p>
+            {msg['text']}
+          </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    st.divider()
+
+    # ── Thursday Meeting ──────────────────────────────────────────────────────
+    st.markdown("### 🤝 Thursday Meeting — June 11, 2026 · 2:04 PM")
+    tm = THURSDAY_MEETING
+    st.caption(f"{tm['location']} · {', '.join(tm['attendees'])}")
+
+    for turn in tm["opening_exchange"]:
+        is_advisor = "Advisor" in turn["speaker"]
+        bg     = "#EFF6FF" if is_advisor else "#F8FAFC"
+        border = "#003087" if is_advisor else "#475569"
+        st.markdown(f"""
+        <div style="background:{bg};border-left:4px solid {border};
+                    padding:12px 16px;border-radius:6px;margin-bottom:6px">
+          <p style="font-size:11px;color:#64748B;margin:0 0 6px 0"><strong>{turn['speaker']}</strong></p>
+          <p style="margin:0;color:#1A1A2E;font-size:14px;line-height:1.6">{turn['text']}</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+    st.markdown("**Meeting agenda**")
+    for item in tm["agenda"]:
+        st.markdown(f"- {item}")
+
+    st.divider()
+
+    # ── New Graph Nodes ───────────────────────────────────────────────────────
+    st.markdown("### 🧠 New Memory Nodes — What This Day Added to the Graph")
+    col_n, col_e = st.columns([1, 1])
+
+    with col_n:
+        st.markdown("**New nodes**")
+        for n in NEW_GRAPH_NODES:
+            color = NODE_COLORS.get(n["type"], "#888")
+            st.markdown(
+                f'<span class="node-chip" style="background:{color}">{n["type"]}</span> '
+                f'<code style="font-size:11px">{n["label"].replace("_"," ")}</code>',
+                unsafe_allow_html=True,
+            )
+            st.markdown(
+                f'<p style="font-size:11px;color:#64748B;margin:0 0 10px 10px">{n["summary"]}</p>',
+                unsafe_allow_html=True,
+            )
+
+    with col_e:
+        st.markdown("**New edges**")
+        for src, rel, tgt in NEW_GRAPH_EDGES:
+            st.markdown(
+                f'<code style="font-size:11px">{src.replace("_"," ")}</code>'
+                f'<span style="color:#C8A034;font-weight:700"> → {rel} → </span>'
+                f'<code style="font-size:11px">{tgt.replace("_"," ")}</code>',
+                unsafe_allow_html=True,
+            )
+            st.markdown("")
