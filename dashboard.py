@@ -21,7 +21,7 @@ from sample_clients import CLIENTS
 from simulation import MARKET_EVENT, SYSTEM_ALERT, PRE_CALL_BRIEF, CONVERSATION, CALL_OUTCOME
 from real_conversation import (VOICEMAIL, ADVISOR_PREP, PHONE_CALL, FOLLOW_UP_EMAIL,
                                 TEXT_EXCHANGE, THURSDAY_MEETING, NEW_GRAPH_NODES, NEW_GRAPH_EDGES)
-from hf_loader import load_hf_clients
+from hf_loader import load_hf_clients, HF_RAW_ROWS, HF_RAW_ENCODED
 
 # ── Page config ───────────────────────────────────────────────────────────────
 st.set_page_config(
@@ -761,11 +761,185 @@ if tab7 is not None:
         st.markdown(
             f"<div style='background:#F0FDF4;border-left:4px solid #065F46;padding:10px 16px;"
             f"border-radius:6px;margin-bottom:20px;font-size:13px;color:#1A1A2E'>"
-            f"<strong>Data source:</strong> {data_source}<br>"
-            f"Rows shown are representative of the <strong>TheFinAI/conv-finre</strong> dataset structure — "
-            f"conversational, longitudinal financial advisory dialogues with client profiling and "
-            f"multi-turn recommendation tracking."
+            f"<strong>Data source:</strong> {data_source} &nbsp;·&nbsp; "
+            f"<strong>Dataset:</strong> TheFinAI/conv-finre &nbsp;·&nbsp; "
+            f"<strong>Split:</strong> test · 230 rows"
             f"</div>",
+            unsafe_allow_html=True,
+        )
+
+        # ── SECTION A: Raw rows (what HuggingFace actually contains) ──────────
+        st.markdown("### Step 1 — What the raw dataset looks like")
+        st.markdown(
+            "<p style='font-size:13px;color:#475569;margin-bottom:12px'>"
+            "This is what you see at <code>huggingface.co/datasets/TheFinAI/conv-finre</code> — "
+            "columns: <code>id</code> · <code>user_id</code> · <code>step</code> · <code>date</code> · "
+            "<code>messages</code> · <code>labels</code> · <code>meta</code> · <code>prompt</code>"
+            "</p>",
+            unsafe_allow_html=True,
+        )
+
+        for raw in HF_RAW_ROWS:
+            with st.expander(
+                f"🗂️  {raw['id']}  ·  {raw['date']}  ·  step {raw['step']}",
+                expanded=(raw["step"] == 9),
+            ):
+                col_left, col_right = st.columns([1, 1])
+
+                with col_left:
+                    st.markdown("**`messages` — the conversation**")
+                    for msg in raw["messages"]:
+                        is_adv = msg["role"] == "advisor"
+                        bg     = "#EFF6FF" if is_adv else "#F8FAFC"
+                        border = "#003087" if is_adv else "#475569"
+                        role   = "Advisor" if is_adv else "Client"
+                        st.markdown(
+                            f"<div style='background:{bg};border-left:3px solid {border};"
+                            f"padding:8px 12px;border-radius:5px;margin-bottom:6px'>"
+                            f"<p style='font-size:10px;color:#64748B;margin:0 0 3px 0'><strong>{role}</strong></p>"
+                            f"<p style='font-size:12px;color:#1A1A2E;margin:0'>{msg['content']}</p>"
+                            f"</div>",
+                            unsafe_allow_html=True,
+                        )
+
+                    st.markdown("**`prompt` — what gets sent to the LLM**")
+                    st.markdown(
+                        f"<div style='background:#1A1A2E;padding:10px 14px;border-radius:6px'>"
+                        f"<p style='font-size:11px;color:#94A3B8;margin:0;font-family:monospace'>{raw['prompt']}</p>"
+                        f"</div>",
+                        unsafe_allow_html=True,
+                    )
+
+                with col_right:
+                    st.markdown("**`labels` — three competing ground truths**")
+
+                    label_meta = [
+                        ("momentum_rank",    "#991B1B", "What price momentum says to buy"),
+                        ("utility_rank",     "#065F46", "What's rational for this client's risk profile"),
+                        ("user_choice_rank", "#1D4ED8", "What the client actually chose"),
+                    ]
+                    for key, col, desc in label_meta:
+                        tickers = raw["labels"].get(key, [])
+                        st.markdown(
+                            f"<div style='background:white;border-left:3px solid {col};"
+                            f"padding:8px 12px;border-radius:5px;margin-bottom:8px;"
+                            f"box-shadow:0 1px 3px rgba(0,0,0,0.06)'>"
+                            f"<p style='font-size:10px;color:{col};font-weight:700;margin:0 0 3px 0'>"
+                            f"<code>{key}</code></p>"
+                            f"<p style='font-size:11px;color:#64748B;margin:0 0 5px 0'>{desc}</p>"
+                            f"<p style='font-size:13px;font-weight:600;color:#1A1A2E;margin:0'>"
+                            f"{'  →  '.join(tickers)}</p>"
+                            f"</div>",
+                            unsafe_allow_html=True,
+                        )
+
+                    st.markdown("**`meta` — context for the session**")
+                    meta = raw["meta"]
+                    st.markdown(
+                        f"<div class='client-card'>"
+                        f"<p style='font-size:12px;color:#64748B;margin:2px 0'>"
+                        f"<strong>Candidate tickers:</strong> {', '.join(meta['candidate_tickers'])}</p>"
+                        f"<p style='font-size:12px;color:#64748B;margin:2px 0'>"
+                        f"<strong>Risk profile:</strong> {meta['user_risk_profile']}</p>"
+                        f"<p style='font-size:12px;color:#64748B;margin:2px 0'>"
+                        f"<strong>Horizon:</strong> {meta['horizon_days']} days</p>"
+                        f"</div>",
+                        unsafe_allow_html=True,
+                    )
+
+        # ── SECTION B: The key insight — three rankings diverge ───────────────
+        st.divider()
+        st.markdown("### The key insight — three rankings, one client, same day")
+        st.markdown(
+            "<div style='background:#FFFBEB;border-left:4px solid #C8A034;padding:14px 18px;"
+            "border-radius:6px;margin-bottom:16px;font-size:13px;color:#1A1A2E'>"
+            "<strong>Step 11 (Aug 29):</strong> AMZN is up 3% pre-market. "
+            "The three rankings completely disagree:<br><br>"
+            "📈 <strong style='color:#991B1B'>Momentum says:</strong> TSLA #1, XOM #2, AMZN #3<br>"
+            "🧠 <strong style='color:#065F46'>Utility says:</strong> JPM #1, XOM #2, MMM #3<br>"
+            "👤 <strong style='color:#1D4ED8'>Client chose:</strong> JPM #1, XOM #2, TSLA #3<br><br>"
+            "The client ignored the AMZN momentum, responded to JPM analyst upgrades, "
+            "and stuck with XOM. That pattern — repeated across 3 sessions — is a <strong>behavioural signal</strong>. "
+            "An LLM trained only on user_choice_rank would learn that pattern. "
+            "An LLM trained only on momentum_rank would recommend TSLA and AMZN this client doesn't want."
+            "</div>",
+            unsafe_allow_html=True,
+        )
+
+        # ── SECTION C: What our system extracts ───────────────────────────────
+        st.divider()
+        st.markdown("### Step 2 — What our memory graph extracts from those 3 rows")
+        st.markdown(
+            "<p style='font-size:13px;color:#475569;margin-bottom:12px'>"
+            "Our encoder reads the 3 sessions above and converts behavioural patterns "
+            "into persistent memory nodes — so the advisor carries this forward to every future conversation."
+            "</p>",
+            unsafe_allow_html=True,
+        )
+
+        col_enc_n, col_enc_e = st.columns([1, 1])
+
+        with col_enc_n:
+            st.markdown("**Extracted nodes**")
+            for n in HF_RAW_ENCODED["nodes"]:
+                color = NODE_COLORS.get(n["type"], "#888")
+                st.markdown(
+                    f'<span class="node-chip" style="background:{color}">{n["type"]}</span> '
+                    f'<code style="font-size:11px">{n["label"].replace("_"," ")}</code>',
+                    unsafe_allow_html=True,
+                )
+                st.markdown(
+                    f'<p style="font-size:11px;color:#64748B;margin:0 0 10px 12px">{n["summary"]}</p>',
+                    unsafe_allow_html=True,
+                )
+
+            st.markdown("**Extracted edges**")
+            for src, rel, tgt in HF_RAW_ENCODED["edges"]:
+                st.markdown(
+                    f'<code style="font-size:11px">{src.replace("_"," ")}</code>'
+                    f'<span style="color:#C8A034;font-weight:700"> → {rel} → </span>'
+                    f'<code style="font-size:11px">{tgt.replace("_"," ")}</code>',
+                    unsafe_allow_html=True,
+                )
+                st.markdown("")
+
+        with col_enc_e:
+            st.markdown("**Advisor alert generated**")
+            alert  = HF_RAW_ENCODED["advisor_alert"]
+            action = alert["action"]
+            icon, ac = ACTION_BADGE.get(action, ("⚪", "#888"))
+            st.markdown(
+                f"<div class='alert-card' style='border-left-color:{ac}'>"
+                f"<span style='background:{ac};color:white;padding:2px 12px;"
+                f"border-radius:12px;font-size:12px;font-weight:700'>{icon} {action}</span>"
+                f"<p style='margin:8px 0 4px 0;font-size:13px;color:#1A1A2E'>"
+                f"<strong>Trigger:</strong> {alert['trigger']}</p>"
+                f"<p style='font-size:13px;color:#1A1A2E;margin:4px 0'>"
+                f"<strong>Context:</strong> {alert['context']}</p>"
+                f"<p style='font-size:13px;color:#003087;margin:4px 0'>"
+                f"<strong>Approach:</strong> {alert['suggested_approach']}</p>"
+                f"</div>",
+                unsafe_allow_html=True,
+            )
+
+            st.markdown(
+                "<div style='background:#F5F3FF;border-left:3px solid #7C3AED;"
+                "padding:12px 16px;border-radius:6px;margin-top:16px;font-size:12px;color:#1A1A2E'>"
+                "<strong>🔁 What this enables:</strong><br>"
+                "Next time XOM drops on earnings, this client fires to the top of the alert queue. "
+                "The advisor already knows: frame it around analyst opinion, not price action. "
+                "That insight came from 3 rows of raw ranking data."
+                "</div>",
+                unsafe_allow_html=True,
+            )
+
+        st.divider()
+        st.markdown("### Step 3 — Deeper client profiles (Conv-FinRe onboarding style)")
+        st.markdown(
+            "<p style='font-size:13px;color:#475569;margin-bottom:16px'>"
+            "The dataset also includes onboarding interviews — a 4-turn dialogue that captures "
+            "each investor's background, goals, and risk reactions before any stock ranking begins."
+            "</p>",
             unsafe_allow_html=True,
         )
 

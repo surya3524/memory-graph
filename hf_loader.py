@@ -250,6 +250,195 @@ HF_SAMPLE_CLIENTS = [
 ]
 
 
+# ─────────────────────────────────────────────────────────────────────────────
+# RAW SAMPLE ROWS — exact schema from the HuggingFace dataset viewer
+# Columns: id, user_id, step, date, messages, labels, meta, prompt
+# These mirror what you actually see at huggingface.co/datasets/TheFinAI/conv-finre
+# ─────────────────────────────────────────────────────────────────────────────
+
+HF_RAW_ROWS = [
+    {
+        "id":      "User_4_step_9",
+        "user_id": "User_4",
+        "step":    9,
+        "date":    "2025-08-27",
+        "messages": [
+            {
+                "role":    "advisor",
+                "content": (
+                    "Thanks for making the time today. I'm going to ask you to look at "
+                    "a set of stocks and tell me which ones feel right for your portfolio "
+                    "given where we are in the market right now."
+                ),
+            },
+            {
+                "role":    "client",
+                "content": (
+                    "Sure. I've been watching energy lately. XOM has been holding up well "
+                    "and I like the dividend. TSLA feels volatile but there's upside. "
+                    "I'm less sure about the consumer staples right now."
+                ),
+            },
+            {
+                "role":    "advisor",
+                "content": (
+                    "Given your profile and what you've just said, how would you rank "
+                    "TSLA, XOM, MMM, AMZN, and JPM for the next two weeks?"
+                ),
+            },
+            {
+                "role":    "client",
+                "content": "XOM first, then TSLA, then JPM. I'd leave MMM and AMZN for now.",
+            },
+        ],
+        "labels": {
+            "momentum_rank":      ["TSLA", "XOM", "MMM", "JPM", "AMZN"],
+            "utility_rank":       ["XOM", "JPM", "MMM", "AMZN", "TSLA"],
+            "user_choice_rank":   ["XOM", "TSLA", "JPM", "AMZN", "MMM"],
+        },
+        "meta": {
+            "candidate_tickers":  ["AMZN", "JPM", "LIN", "MMM", "TSLA", "XOM", "SPG", "PG", "VZ", "MRK"],
+            "user_risk_profile":  "Moderate",
+            "horizon_days":       14,
+        },
+        "prompt": (
+            "[ADVISOR] Thanks for making the time today. I'm going to ask you to look at "
+            "a set of stocks and tell me which ones feel right for your portfolio. "
+            "Candidate stocks: AMZN, JPM, LIN, MMM, TSLA, XOM, SPG, PG, VZ, MRK. "
+            "[CLIENT PROFILE] Moderate risk. 45–55. Self-directed with advisor oversight. "
+            "Prefers dividend payers. Concerned about rate sensitivity."
+        ),
+    },
+    {
+        "id":      "User_4_step_10",
+        "user_id": "User_4",
+        "step":    10,
+        "date":    "2025-08-28",
+        "messages": [
+            {
+                "role":    "advisor",
+                "content": (
+                    "Thanks for making the time today. Yesterday XOM pulled back slightly "
+                    "after the EIA inventory report. TSLA bounced on delivery rumours. "
+                    "How are you thinking about the same set today?"
+                ),
+            },
+            {
+                "role":    "client",
+                "content": (
+                    "Still like XOM long term. TSLA bounce feels speculative to me — "
+                    "I'm not chasing it. JPM earnings are next week so I'd move that up."
+                ),
+            },
+            {
+                "role":    "advisor",
+                "content": "Given that, how would you rank the candidates today?",
+            },
+            {
+                "role":    "client",
+                "content": "XOM, JPM, then TSLA. Same bottom two.",
+            },
+        ],
+        "labels": {
+            "momentum_rank":      ["TSLA", "XOM", "JPM", "AMZN", "MMM"],
+            "utility_rank":       ["XOM", "JPM", "MMM", "AMZN", "TSLA"],
+            "user_choice_rank":   ["XOM", "JPM", "TSLA", "AMZN", "MMM"],
+        },
+        "meta": {
+            "candidate_tickers":  ["AMZN", "JPM", "LIN", "MMM", "TSLA", "XOM", "SPG", "PG", "VZ", "MRK"],
+            "user_risk_profile":  "Moderate",
+            "horizon_days":       14,
+        },
+        "prompt": (
+            "[ADVISOR] Thanks for making the time today. Yesterday XOM pulled back slightly. "
+            "TSLA bounced on delivery rumours. "
+            "Candidate stocks: AMZN, JPM, LIN, MMM, TSLA, XOM, SPG, PG, VZ, MRK. "
+            "[CLIENT PROFILE] Moderate risk. 45–55. Dividend focus. Rate sensitive."
+        ),
+    },
+    {
+        "id":      "User_4_step_11",
+        "user_id": "User_4",
+        "step":    11,
+        "date":    "2025-08-29",
+        "messages": [
+            {
+                "role":    "advisor",
+                "content": (
+                    "Thanks for making the time today. AMZN is up 3% pre-market on AWS figures. "
+                    "XOM flat. JPM upgraded by two analysts this morning."
+                ),
+            },
+            {
+                "role":    "client",
+                "content": (
+                    "Okay that changes things a bit. JPM upgrade is meaningful. "
+                    "I'd move it to number one today. AMZN — I don't trust cloud multiples right now. "
+                    "I'll keep XOM second."
+                ),
+            },
+            {
+                "role":    "advisor",
+                "content": "Full ranking for today?",
+            },
+            {
+                "role":    "client",
+                "content": "JPM, XOM, TSLA, MMM, AMZN.",
+            },
+        ],
+        "labels": {
+            "momentum_rank":      ["TSLA", "XOM", "AMZN", "JPM", "MMM"],
+            "utility_rank":       ["JPM", "XOM", "MMM", "AMZN", "TSLA"],
+            "user_choice_rank":   ["JPM", "XOM", "TSLA", "MMM", "AMZN"],
+        },
+        "meta": {
+            "candidate_tickers":  ["AMZN", "JPM", "LIN", "MMM", "TSLA", "XOM", "SPG", "PG", "VZ", "MRK"],
+            "user_risk_profile":  "Moderate",
+            "horizon_days":       14,
+        },
+        "prompt": (
+            "[ADVISOR] Thanks for making the time today. AMZN up 3% pre-market on AWS. "
+            "JPM upgraded by two analysts. "
+            "Candidate stocks: AMZN, JPM, LIN, MMM, TSLA, XOM, SPG, PG, VZ, MRK. "
+            "[CLIENT PROFILE] Moderate risk. 45–55. Dividend focus. Rate sensitive."
+        ),
+    },
+]
+
+# What our encoder extracts FROM the 3 raw rows above — this is the transformation
+HF_RAW_ENCODED = {
+    "nodes": [
+        {"type": "belief",  "label": "energy_conviction_over_momentum",
+         "summary": "Client ranks XOM top across 3 sessions despite TSLA having stronger momentum signal. Dividend preference over growth."},
+        {"type": "belief",  "label": "skeptical_of_cloud_multiples",
+         "summary": "Explicitly rejected AMZN 3% rally — 'I don't trust cloud multiples right now.' Valuation-anchored thinking."},
+        {"type": "emotion", "label": "analyst_driven_conviction_shift",
+         "summary": "On step 11, two JPM upgrades immediately moved JPM from #3 to #1. Responsive to institutional signals."},
+        {"type": "action",  "label": "consistent_tsla_underweight",
+         "summary": "TSLA ranked 2nd, 3rd, 3rd across 3 sessions despite being #1 in momentum_rank all 3 days. Deliberate underweight vs momentum."},
+    ],
+    "edges": [
+        ("energy_conviction_over_momentum", "TENSION_WITH",  "consistent_tsla_underweight"),
+        ("analyst_driven_conviction_shift",  "LED_TO",        "jpmorgan_moved_to_top_rank"),
+        ("skeptical_of_cloud_multiples",     "REFLECTS_ON",  "energy_conviction_over_momentum"),
+    ],
+    "advisor_alert": {
+        "action":   "MONITOR",
+        "trigger":  "Energy sector news — any XOM-specific event (earnings, dividend cut, oil move >5%)",
+        "context":  (
+            "Client is anchored to XOM across all 3 sessions regardless of momentum. "
+            "Responds quickly to analyst upgrades (JPM step 11). "
+            "Actively avoids momentum chasing — this is a behavioural signal, not ignorance."
+        ),
+        "suggested_approach": (
+            "Frame any rebalancing suggestion around analyst opinion, not price action. "
+            "'Two analysts upgraded X' will land. 'X is up 8% this week' will not move this client. "
+            "Watch for XOM-specific negative catalyst — this client will be slow to exit."
+        ),
+    },
+}
+
+
 def load_hf_clients(use_live: bool = False):
     """
     Returns client data from HuggingFace datasets.
