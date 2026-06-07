@@ -160,7 +160,7 @@ def load_graph():
 G = load_graph()
 summary = graph_summary(G)
 client_lookup = {c["id"]: c for c in CLIENTS}
-hf_clients, hf_live = load_hf_clients()
+hf_clients, hf_live = load_hf_clients(use_live=True)
 
 # ── Sidebar ───────────────────────────────────────────────────────────────────
 _ver     = json.load(open(os.path.join(os.path.dirname(__file__), "version.json")))
