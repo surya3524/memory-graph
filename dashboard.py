@@ -21,6 +21,7 @@ from sample_clients import CLIENTS
 from simulation import MARKET_EVENT, SYSTEM_ALERT, PRE_CALL_BRIEF, CONVERSATION, CALL_OUTCOME
 from real_conversation import (VOICEMAIL, ADVISOR_PREP, PHONE_CALL, FOLLOW_UP_EMAIL,
                                 TEXT_EXCHANGE, THURSDAY_MEETING, NEW_GRAPH_NODES, NEW_GRAPH_EDGES)
+from hf_loader import load_hf_clients
 
 # ── Page config ───────────────────────────────────────────────────────────────
 st.set_page_config(
@@ -159,6 +160,7 @@ def load_graph():
 G = load_graph()
 summary = graph_summary(G)
 client_lookup = {c["id"]: c for c in CLIENTS}
+hf_clients, hf_live = load_hf_clients()
 
 # ── Sidebar ───────────────────────────────────────────────────────────────────
 _ver     = json.load(open(os.path.join(os.path.dirname(__file__), "version.json")))
@@ -201,15 +203,29 @@ with st.sidebar:
             unsafe_allow_html=True,
         )
 
+    st.divider()
+    st.markdown(
+        "<div style='opacity:0.25;font-size:10px'>",
+        unsafe_allow_html=True,
+    )
+    st.checkbox("🔬 dataset", key="hf_mode")
+    st.markdown("</div>", unsafe_allow_html=True)
+
 # ── Tabs ──────────────────────────────────────────────────────────────────────
-tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
+_tab_labels = [
     "⚡  Market Alerts",
     "🧠  Client Memory Graph",
     "📅  Memory Timeline",
     "✍️  Note Encoder",
     "🔴  PHLX Simulation",
     "🎙️  Real Conversation",
-])
+]
+if st.session_state.get("hf_mode", False):
+    _tab_labels.append("🤗  Real Data")
+
+_tabs = st.tabs(_tab_labels)
+tab1, tab2, tab3, tab4, tab5, tab6 = _tabs[:6]
+tab7 = _tabs[6] if len(_tabs) > 6 else None
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # TAB 1 — Market Alerts
@@ -734,3 +750,127 @@ with tab6:
                 unsafe_allow_html=True,
             )
             st.markdown("")
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# TAB 7 — HuggingFace Real Data (hidden — toggle 🔬 in sidebar to reveal)
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+if tab7 is not None:
+    with tab7:
+        st.markdown("## Real Dataset — Conv-FinRe / hub24")
+        data_source = "🟢 Live from HuggingFace Hub" if hf_live else "🟡 Bundled sample rows (Conv-FinRe schema)"
+        st.markdown(
+            f"<div style='background:#F0FDF4;border-left:4px solid #065F46;padding:10px 16px;"
+            f"border-radius:6px;margin-bottom:20px;font-size:13px;color:#1A1A2E'>"
+            f"<strong>Data source:</strong> {data_source}<br>"
+            f"Rows shown are representative of the <strong>TheFinAI/conv-finre</strong> dataset structure — "
+            f"conversational, longitudinal financial advisory dialogues with client profiling and "
+            f"multi-turn recommendation tracking."
+            f"</div>",
+            unsafe_allow_html=True,
+        )
+
+        RISK_COLORS = {
+            "Conservative": "#065F46",
+            "Moderate":     "#1D4ED8",
+            "Aggressive":   "#991B1B",
+        }
+
+        for client in hf_clients:
+            uid       = client["user_id"]
+            source    = client["source"]
+            risk      = client["risk_profile"]
+            age       = client["age_bracket"]
+            risk_col  = RISK_COLORS.get(risk, "#444")
+            onboard   = client["onboarding"]
+
+            st.markdown(
+                f"<div style='background:white;border-left:5px solid {risk_col};"
+                f"padding:14px 20px;border-radius:8px;margin-bottom:6px;"
+                f"box-shadow:0 1px 4px rgba(0,0,0,0.07)'>"
+                f"<div style='display:flex;justify-content:space-between;align-items:center'>"
+                f"<span style='font-size:18px;font-weight:700;color:#003087'>{uid}</span>"
+                f"<span style='background:{risk_col};color:white;padding:2px 12px;"
+                f"border-radius:12px;font-size:12px;font-weight:600'>{risk}</span>"
+                f"</div>"
+                f"<p style='color:#64748B;font-size:12px;margin:4px 0 0 0'>"
+                f"Age {age} &nbsp;·&nbsp; {source}</p>"
+                f"</div>",
+                unsafe_allow_html=True,
+            )
+
+            with st.expander(f"📋 {uid} — Onboarding + Conversation", expanded=False):
+                col_ob, col_cv = st.columns([1, 1])
+
+                with col_ob:
+                    st.markdown("**Onboarding profile**")
+                    st.markdown(
+                        f"<div class='client-card'>"
+                        f"<p style='font-size:13px;color:#1A1A2E;margin:0 0 8px 0'>{onboard['background']}</p>"
+                        f"<p style='font-size:12px;color:#64748B;margin:4px 0'>"
+                        f"<strong>Risk tolerance:</strong> {onboard['stated_risk_tolerance']}</p>"
+                        f"<p style='font-size:12px;color:#64748B;margin:4px 0'>"
+                        f"<strong>Horizon:</strong> {onboard['investment_horizon']}</p>"
+                        f"<p style='font-size:12px;color:#64748B;margin:4px 0'>"
+                        f"<strong>Experience:</strong> {onboard['prior_experience']}</p>"
+                        f"</div>",
+                        unsafe_allow_html=True,
+                    )
+
+                    st.markdown("**Pre-encoded nodes**")
+                    for n in client["encoded_nodes"]:
+                        color = NODE_COLORS.get(n["type"], "#888")
+                        st.markdown(
+                            f'<span class="node-chip" style="background:{color}">'
+                            f'{n["type"]}</span> '
+                            f'<code style="font-size:11px">{n["label"].replace("_"," ")}</code>',
+                            unsafe_allow_html=True,
+                        )
+                        st.markdown(
+                            f'<p style="font-size:11px;color:#64748B;margin:0 0 8px 12px">'
+                            f'{n["summary"]}</p>',
+                            unsafe_allow_html=True,
+                        )
+
+                    st.markdown("**Edges**")
+                    for src, rel, tgt in client["encoded_edges"]:
+                        st.markdown(
+                            f'<code style="font-size:11px">{src.replace("_"," ")}</code>'
+                            f'<span style="color:#C8A034;font-weight:700"> → {rel} → </span>'
+                            f'<code style="font-size:11px">{tgt.replace("_"," ")}</code>',
+                            unsafe_allow_html=True,
+                        )
+                        st.markdown("")
+
+                with col_cv:
+                    st.markdown("**Advisory dialogue**")
+                    for turn in client["conversations"]:
+                        is_advisor = turn["role"] == "advisor"
+                        bg     = "#EFF6FF" if is_advisor else "#F8FAFC"
+                        border = "#003087" if is_advisor else "#475569"
+                        label  = f"**Advisor** · Turn {turn['turn']}" if is_advisor else f"**Client** · Turn {turn['turn']}"
+                        st.markdown(
+                            f"<div style='background:{bg};border-left:4px solid {border};"
+                            f"padding:10px 14px;border-radius:6px;margin-bottom:8px'>"
+                            f"<p style='font-size:11px;color:#64748B;margin:0 0 4px 0'>{label}</p>"
+                            f"<p style='margin:0;color:#1A1A2E;font-size:13px;line-height:1.6'>{turn['text']}</p>"
+                            f"</div>",
+                            unsafe_allow_html=True,
+                        )
+
+                    st.markdown("**Advisor alert**")
+                    alert   = client["advisor_alert"]
+                    action  = alert["action"]
+                    icon, ac = ACTION_BADGE.get(action, ("⚪", "#888"))
+                    st.markdown(
+                        f"<div class='alert-card' style='border-left-color:{ac}'>"
+                        f"<span style='background:{ac};color:white;padding:2px 12px;"
+                        f"border-radius:12px;font-size:12px;font-weight:700'>{icon} {action}</span>"
+                        f"<p style='margin:8px 0 4px 0;font-size:13px;color:#1A1A2E'>"
+                        f"<strong>Trigger:</strong> {alert['trigger']}</p>"
+                        f"<p style='font-size:13px;color:#1A1A2E;margin:4px 0'>"
+                        f"<strong>Context:</strong> {alert['context']}</p>"
+                        f"<p style='font-size:13px;color:#003087;margin:4px 0'>"
+                        f"<strong>Approach:</strong> {alert['suggested_approach']}</p>"
+                        f"</div>",
+                        unsafe_allow_html=True,
+                    )
