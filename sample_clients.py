@@ -58,7 +58,7 @@ CLIENTS = [
             {
                 "date": "2025-01-20",
                 "note": "Annual review. Portfolio recovered fully. Client satisfied. "
-                        "Reiterated: 'Promise me you will call me before I do something stupid "
+                        "Reiterated: 'Promise me you will call me before I do something I'll regret "
                         "if the market drops again.'",
                 "nodes": [
                     {"type": "belief", "label": "explicitly_requested_proactive_outreach"},
