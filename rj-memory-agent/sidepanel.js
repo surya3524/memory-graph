@@ -5,6 +5,7 @@ const MAX_TOKENS = 1200;
 
 // ── DOM refs ──────────────────────────────────────────────────────────────────
 const scanBtn      = document.getElementById("scanBtn");
+const stopBtn      = document.getElementById("stopBtn");
 const questionEl   = document.getElementById("question");
 const statusEl     = document.getElementById("status");
 const stepsEl      = document.getElementById("steps");
@@ -73,6 +74,7 @@ scanBtn.addEventListener("click", async () => {
 
   reset();
   setBtn(true);
+  stopBtn.style.display = "block";
   addStep(0, "🚀 Starting agent...");
 
   const result = await chrome.runtime.sendMessage({
@@ -81,15 +83,23 @@ scanBtn.addEventListener("click", async () => {
     apiKey,
   });
 
+  stopBtn.style.display = "none";
+
   if (result.success) {
     showAnswer(result.answer);
-    setStatus("✅ Done");
+    setStatus(result.stopped ? "🛑 Stopped by user" : "✅ Done");
   } else {
     showError(result.error || "Something went wrong.");
     setStatus("");
   }
 
   setBtn(false);
+});
+
+stopBtn.addEventListener("click", () => {
+  chrome.runtime.sendMessage({ action: "stopAgentLoop" });
+  stopBtn.style.display = "none";
+  addStep(0, "🛑 Stopping after this step...");
 });
 
 // ── UI helpers ────────────────────────────────────────────────────────────────

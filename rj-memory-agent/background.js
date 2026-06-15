@@ -3,6 +3,9 @@ const MAX_STEPS    = 10;
 const AGENT_MODEL  = "claude-sonnet-4-6";
 const AGENT_TOKENS = 1500;
 
+let agentAbortController = null;
+let agentShouldStop      = false;
+
 chrome.action.onClicked.addListener(tab => {
   chrome.sidePanel.open({ tabId: tab.id });
 });
@@ -10,10 +13,15 @@ chrome.action.onClicked.addListener(tab => {
 // ── Message router ────────────────────────────────────────────────────────────
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.action === "startAgentLoop") {
+    agentShouldStop = false;
     runAgentLoop(message.question, message.apiKey)
-      .then(result => sendResponse({ success: true, answer: result }))
+      .then(result => sendResponse(result))
       .catch(err   => sendResponse({ success: false, error: err.message }));
     return true;
+  }
+  if (message.action === "stopAgentLoop") {
+    agentShouldStop = true;
+    if (agentAbortController) agentAbortController.abort();
   }
 });
 
@@ -30,16 +38,16 @@ function sendScreenshot(dataB64, label) {
 // ── Agent loop ────────────────────────────────────────────────────────────────
 async function runAgentLoop(question, apiKey) {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-  if (!tab) throw new Error("No active tab found.");
+  if (!tab) return { success: false, error: "No active tab found." };
   if (tab.url.startsWith("chrome://") || tab.url.startsWith("chrome-extension://")) {
-    throw new Error("Cannot scan Chrome internal pages. Navigate to a real webpage first.");
+    return { success: false, error: "Cannot scan Chrome internal pages. Navigate to a real webpage first." };
   }
 
   // Inject content script
   await chrome.scripting.executeScript({ target: { tabId: tab.id }, files: ["content.js"] });
   await sleep(200);
   const ping = await safeSend(tab.id, { action: "ping" });
-  if (!ping?.alive) throw new Error("Could not connect to page. Try refreshing.");
+  if (!ping?.alive) return { success: false, error: "Could not connect to page. Try refreshing." };
 
   await chrome.tabs.sendMessage(tab.id, { action: "freezeAnimations" });
 
@@ -95,6 +103,10 @@ async function runAgentLoop(question, apiKey) {
 
   // ── Main loop ────────────────────────────────────────────────────────────────
   while (stepCount < MAX_STEPS) {
+    if (agentShouldStop) {
+      await cleanup(tab.id);
+      return { success: true, answer: "Agent stopped by user.", stopped: true };
+    }
     stepCount++;
 
     // Take screenshot of current view
@@ -126,7 +138,16 @@ async function runAgentLoop(question, apiKey) {
     sendProgress(stepCount, `Step ${stepCount}: Claude is deciding what to do...`);
 
     // Call Claude with tools
-    const response = await callClaudeWithTools(apiKey, systemPrompt, conversationMessages, tools);
+    let response;
+    try {
+      response = await callClaudeWithTools(apiKey, systemPrompt, conversationMessages, tools);
+    } catch (err) {
+      if (agentShouldStop || err.name === "AbortError") {
+        await cleanup(tab.id);
+        return { success: true, answer: "Agent stopped by user.", stopped: true };
+      }
+      throw err;
+    }
 
     // Add assistant turn to conversation
     conversationMessages.push({ role: "assistant", content: response.content });
@@ -136,16 +157,15 @@ async function runAgentLoop(question, apiKey) {
     const textBlock = response.content.find(c => c.type === "text");
 
     if (!toolUse) {
-      // No tool call — treat text as final answer
       await cleanup(tab.id);
-      return textBlock?.text || "No answer generated.";
+      return { success: true, answer: textBlock?.text || "No answer generated." };
     }
 
     // ── Handle each tool ────────────────────────────────────────────────────
     if (toolUse.name === "provide_final_answer") {
       sendProgress(stepCount, "✅ Compiling answer...");
       await cleanup(tab.id);
-      return toolUse.input.answer;
+      return { success: true, answer: toolUse.input.answer };
     }
 
     let toolResult = "";
@@ -188,7 +208,7 @@ async function runAgentLoop(question, apiKey) {
   }
 
   await cleanup(tab.id);
-  return "Reached maximum steps. Based on everything seen, here is my best answer — but consider scrolling through the full page manually for any details I may have missed.";
+  return { success: true, answer: "Reached maximum steps. Based on everything seen, here is my best answer — but consider scrolling through the full page manually for any details I may have missed." };
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -199,8 +219,10 @@ async function captureCurrentView(tab) {
 }
 
 async function callClaudeWithTools(apiKey, system, messages, tools) {
+  agentAbortController = new AbortController();
   const response = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
+    signal: agentAbortController.signal,
     headers: {
       "Content-Type": "application/json",
       "x-api-key": apiKey,
@@ -215,6 +237,7 @@ async function callClaudeWithTools(apiKey, system, messages, tools) {
       messages,
     }),
   });
+  agentAbortController = null;
 
   if (!response.ok) {
     const err = await response.json();

@@ -67,6 +67,8 @@
     }
     .btn:hover:not(:disabled) { background: #004AAD; }
     .btn:disabled { background: #94A3B8; cursor: not-allowed; }
+    .btn-stop { background: #7F1D1D; flex: 0 0 60px; font-size: 12px; }
+    .btn-stop:hover:not(:disabled) { background: #991B1B; }
 
     /* Live steps feed */
     .steps-feed {
@@ -168,7 +170,10 @@
       <textarea id="question" placeholder="e.g. Given that S&P dropped 5% today, who should I call and draft emails for each client."></textarea>
     </div>
 
-    <button class="btn" id="scanBtn">Ask</button>
+    <div style="display:flex; gap:8px;">
+      <button class="btn" id="scanBtn" style="flex:1;">Ask</button>
+      <button class="btn btn-stop" id="stopBtn" style="display:none;">Stop</button>
+    </div>
 
     <div class="status" id="status"></div>
 
