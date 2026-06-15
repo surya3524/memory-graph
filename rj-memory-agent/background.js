@@ -136,7 +136,7 @@ async function runAgentLoop(question, apiKey) {
 
     conversationMessages.push({ role: "user", content: userContent });
 
-    sendProgress(stepCount, `Step ${stepCount}: Claude is deciding what to do...`);
+    sendProgress(stepCount, `Claude is deciding what to do...`);
     await safeSend(tab.id, { action: "updateAgentOverlay", label: `Step ${stepCount} of ${MAX_STEPS} — AI Agent scanning…` });
 
     // Call Claude with tools
