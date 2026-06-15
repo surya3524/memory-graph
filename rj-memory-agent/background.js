@@ -16,7 +16,16 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     agentShouldStop = false;
     runAgentLoop(message.question, message.apiKey)
       .then(result => sendResponse(result))
-      .catch(err   => sendResponse({ success: false, error: err.message }));
+      .catch(err => {
+        // Always clean up the overlay on any crash
+        chrome.tabs.query({ active: true, currentWindow: true }, ([tab]) => {
+          if (tab) {
+            chrome.tabs.sendMessage(tab.id, { action: "hideAgentOverlay" }).catch(() => {});
+            chrome.tabs.sendMessage(tab.id, { action: "unfreezeAnimations" }).catch(() => {});
+          }
+        });
+        sendResponse({ success: false, error: err.message });
+      });
     return true;
   }
   if (message.action === "stopAgentLoop") {
@@ -222,27 +231,34 @@ async function captureCurrentView(tab) {
 
 async function callClaudeWithTools(apiKey, system, messages, tools) {
   agentAbortController = new AbortController();
-  const response = await fetch("https://api.anthropic.com/v1/messages", {
-    method: "POST",
-    signal: agentAbortController.signal,
-    headers: {
-      "Content-Type": "application/json",
-      "x-api-key": apiKey,
-      "anthropic-version": "2023-06-01",
-      "anthropic-dangerous-direct-browser-access": "true",
-    },
-    body: JSON.stringify({
-      model: AGENT_MODEL,
-      max_tokens: AGENT_TOKENS,
-      system,
-      tools,
-      messages,
-    }),
-  });
-  agentAbortController = null;
+  const timeout = setTimeout(() => agentAbortController.abort(), 30000);
+
+  let response;
+  try {
+    response = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      signal: agentAbortController.signal,
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": apiKey,
+        "anthropic-version": "2023-06-01",
+        "anthropic-dangerous-direct-browser-access": "true",
+      },
+      body: JSON.stringify({
+        model: AGENT_MODEL,
+        max_tokens: AGENT_TOKENS,
+        system,
+        tools,
+        messages,
+      }),
+    });
+  } finally {
+    clearTimeout(timeout);
+    agentAbortController = null;
+  }
 
   if (!response.ok) {
-    const err = await response.json();
+    const err = await response.json().catch(() => ({}));
     throw new Error(err.error?.message || `API error ${response.status}`);
   }
   return response.json();
