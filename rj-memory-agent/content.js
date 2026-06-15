@@ -1,24 +1,59 @@
 // content.js — injected into the active page
 if (!window.__rjAgentLoaded) {
   window.__rjAgentLoaded = true;
+  window.__rjContainerCache = undefined; // reset on each fresh injection
+
+  // Cache the working scroll container so we don't re-detect every call
+  let _cachedContainer = window.__rjContainerCache;
 
   function getScrollContainer() {
-    const selectors = [
+    if (_cachedContainer !== undefined) return _cachedContainer;
+
+    // Walk every element and find which ones actually move when scrolled
+    const streamlitSelectors = [
+      '[data-testid="stAppViewBlockContainer"]',
       '[data-testid="stAppViewContainer"]',
-      '.main',
       '[data-testid="stMain"]',
+      '.main > div',
+      '.main',
       '.block-container',
+      'section.main',
     ];
-    for (const sel of selectors) {
+
+    // Try Streamlit-specific selectors first by testing if they actually scroll
+    for (const sel of streamlitSelectors) {
       const el = document.querySelector(sel);
-      if (el && el.scrollHeight > el.clientHeight + 50) return el;
+      if (!el) continue;
+      const before = el.scrollTop;
+      el.scrollTop = before + 1;
+      const moved = el.scrollTop !== before;
+      el.scrollTop = before;
+      if (moved) { _cachedContainer = el; return el; }
     }
-    const candidates = [document.documentElement, document.body];
-    let best = document.documentElement;
-    for (const el of candidates) {
-      if (el.scrollHeight > best.scrollHeight) best = el;
+
+    // Try window scroll
+    const winBefore = window.scrollY;
+    window.scrollBy(0, 1);
+    if (window.scrollY !== winBefore) {
+      window.scrollBy(0, -1);
+      _cachedContainer = null; // null means use window
+      return null;
     }
-    return best.scrollHeight > window.innerHeight + 50 ? best : null;
+    window.scrollBy(0, -1);
+
+    // Last resort: find the deepest element with the most scrollable height
+    let best = null, bestScore = 0;
+    document.querySelectorAll('*').forEach(el => {
+      const score = el.scrollHeight - el.clientHeight;
+      if (score > 100 && score > bestScore) {
+        const style = getComputedStyle(el);
+        if (style.overflowY === 'auto' || style.overflowY === 'scroll') {
+          best = el; bestScore = score;
+        }
+      }
+    });
+    _cachedContainer = best;
+    return best;
   }
 
   chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
@@ -63,6 +98,7 @@ if (!window.__rjAgentLoaded) {
     }
 
     if (message.action === "scrollToTop") {
+      _cachedContainer = undefined; // reset so next call re-detects
       const c = getScrollContainer();
       if (c) c.scrollTo({ top: 0, behavior: "instant" });
       else   window.scrollTo({ top: 0, behavior: "instant" });
