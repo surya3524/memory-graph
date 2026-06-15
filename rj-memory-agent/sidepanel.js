@@ -85,11 +85,11 @@ scanBtn.addEventListener("click", async () => {
 
   stopBtn.style.display = "none";
 
-  if (result.success) {
+  if (result?.success) {
     showAnswer(result.answer);
     setStatus(result.stopped ? "🛑 Stopped by user" : "✅ Done");
   } else {
-    showError(result.error || "Something went wrong.");
+    showError(result?.error || "Something went wrong.");
     setStatus("");
   }
 
@@ -131,7 +131,7 @@ function setBtn(disabled) {
 
 function setStatus(msg) { statusEl.textContent = msg; }
 
-function addStep(num, status, detail = "") {
+function addStep(num, status = "", detail = "") {
   stepsEl.classList.add("visible");
   const row = document.createElement("div");
   row.className = "step-row";
@@ -144,7 +144,7 @@ function addStep(num, status, detail = "") {
 }
 
 function showAnswer(text) {
-  // Render basic markdown: bold, bullets
+  if (!text) return;
   const html = text
     .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
     .replace(/^### (.+)$/gm, "<h4>$1</h4>")
