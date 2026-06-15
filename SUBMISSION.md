@@ -177,3 +177,42 @@ Add one line that shows this is defensible:
 End the submission with a concrete ask:
 > *"We propose a 90-day pilot with 10 advisors across one branch. Success metric: reduction in pre-call research time and increase in proactive client outreach during market events."*
 A specific pilot ask signals you've thought past the idea into execution.
+
+---
+
+## Pilot Proposal
+
+We propose a **90-day pilot with 10 advisors across one branch.**
+
+**Success metrics:**
+- Reduction in pre-call research time per client
+- Increase in proactive client outreach during market events
+- Advisor-reported confidence in recalling client behavioral history
+
+This is not a request to build a production system. It is a request to prove the value of behavioral memory in a real advisor workflow before committing to full integration.
+
+---
+
+## Why This Cannot Be Replicated by Adding AI to the Existing CRM
+
+The most likely pushback from judges: *"Why can't we just add a ChatGPT button to our existing CRM?"*
+
+The answer is the graph structure itself:
+
+> **A flat note system gets noisier over time. A graph gets smarter.**
+
+Every new client interaction adds a node and an edge — connecting a new belief to a past emotion, or a new action to a previous market event. Over time the system builds a behavioral model of each client that no keyword search or AI summary of unstructured notes can replicate. The compounding nature of the graph is the moat.
+
+A CRM AI button answers *"what did this client say?"* Our system answers *"given what this client has said and done over 10 years, what are they likely to do next — and what should the advisor say right now?"*
+
+---
+
+## One Internal Number That Would Make This Undeniable
+
+Before final submission, find the answer to one of these questions by talking to a single RJ financial advisor:
+
+- *"How many minutes do you spend reviewing a client's history before a call?"*
+- *"How many clients did you proactively reach out to during the last major market drop — and how many did you miss?"*
+- *"Has a client ever left because they felt you forgot something important about them?"*
+
+One real answer, cited as *"per advisor interviews conducted during development,"* is worth more than any published research citation to a judge who works at this firm.
