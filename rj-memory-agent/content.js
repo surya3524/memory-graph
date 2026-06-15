@@ -299,7 +299,7 @@ if (!window.__rjAgentLoaded) {
       if (!document.getElementById("__rj_freeze__")) {
         const s = document.createElement("style");
         s.id = "__rj_freeze__";
-        s.textContent = "*, *::before, *::after { animation: none !important; transition: none !important; }";
+        s.textContent = "*:not(#__rj_overlay__):not(#__rj_overlay__ *):not(#__rj_banner__):not(#__rj_scanline__):not(.rj-corner):not(.rj-corner *):not(.rj-dot) { animation: none !important; transition: none !important; }";
         document.head.appendChild(s);
       }
       sendResponse({ done: true });
