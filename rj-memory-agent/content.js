@@ -236,12 +236,17 @@ if (!window.__rjAgentLoaded) {
           .rj-corner-br { bottom: 8px; right: 8px; transform: scale(-1,-1); }
           .rj-corner path {
             stroke: #22c55e; stroke-width: 3; fill: none; stroke-linecap: round;
-            animation: __rj_glow__ 1.4s ease-in-out infinite;
           }
-          @keyframes __rj_glow__ {
-            0%,100% { opacity: 1; filter: drop-shadow(0 0 4px #22c55e); }
-            50%      { opacity: 0.4; filter: drop-shadow(0 0 1px #22c55e); }
+          .rj-corner {
+            animation: __rj_corner_blink__ 0.8s ease-in-out infinite;
           }
+          @keyframes __rj_corner_blink__ {
+            0%,100% { opacity: 1; filter: drop-shadow(0 0 6px #22c55e); }
+            50%      { opacity: 0; filter: drop-shadow(0 0 0px #22c55e); }
+          }
+          .rj-corner-tr { animation-delay: 0.2s; }
+          .rj-corner-bl { animation-delay: 0.4s; }
+          .rj-corner-br { animation-delay: 0.6s; }
           /* Scan line */
           #__rj_scanline__ {
             position: fixed; left: 0; right: 0; height: 2px; z-index: 2147483645;
