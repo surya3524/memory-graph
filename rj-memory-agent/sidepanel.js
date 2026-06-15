@@ -1,37 +1,54 @@
-// popup.js
-// Handles UI interactions — sends messages to background.js, renders Claude's response
+// sidepanel.js — handles UI, API key storage, and Claude API calls
 
-const ANTHROPIC_API_KEY = "YOUR_API_KEY_HERE"; // Paste your key here for local testing only — never commit a real key
-const MODEL = "claude-sonnet-4-6";
+const MODEL      = "claude-sonnet-4-6";
 const MAX_TOKENS = 1200;
 
 // ── DOM refs ──────────────────────────────────────────────────────────────────
-const scanBtn     = document.getElementById("scanBtn");
-const questionEl  = document.getElementById("question");
-const statusEl    = document.getElementById("status");
-const progressBar = document.getElementById("progressBar");
+const scanBtn      = document.getElementById("scanBtn");
+const questionEl   = document.getElementById("question");
+const statusEl     = document.getElementById("status");
+const progressBar  = document.getElementById("progressBar");
 const progressFill = document.getElementById("progressFill");
-const metaEl      = document.getElementById("meta");
-const answerBox   = document.getElementById("answerBox");
-const errorBox    = document.getElementById("errorBox");
+const metaEl       = document.getElementById("meta");
+const answerBox    = document.getElementById("answerBox");
+const errorBox     = document.getElementById("errorBox");
+const keyInput     = document.getElementById("keyInput");
+const saveKeyBtn   = document.getElementById("saveKeyBtn");
+const keyStatus    = document.getElementById("keyStatus");
 
-// ── Main handler ──────────────────────────────────────────────────────────────
+// ── Load saved API key on open ────────────────────────────────────────────────
+chrome.storage.sync.get("apiKey", data => {
+  if (data.apiKey) {
+    keyInput.value = data.apiKey;
+    keyStatus.classList.add("visible");
+  }
+});
+
+saveKeyBtn.addEventListener("click", () => {
+  const key = keyInput.value.trim();
+  if (!key) return;
+  chrome.storage.sync.set({ apiKey: key }, () => {
+    keyStatus.textContent = "✓ Key saved";
+    keyStatus.classList.add("visible");
+  });
+});
+
+// ── Main scan handler ─────────────────────────────────────────────────────────
 scanBtn.addEventListener("click", async () => {
   const question = questionEl.value.trim();
-  if (!question) {
-    showError("Please type a question first.");
-    return;
-  }
+  if (!question) { showError("Please type a question first."); return; }
+
+  const apiKey = keyInput.value.trim();
+  if (!apiKey) { showError("Please enter and save your Anthropic API key above."); return; }
 
   reset();
   setBtn(true);
-  setProgress(0);
+  setProgress(5);
   setStatus("📸 Scanning page...");
 
   try {
-    // Step 1 — ask background.js to scroll and screenshot
+    // Step 1 — background.js scrolls and screenshots
     const result = await chrome.runtime.sendMessage({ action: "captureFullPage" });
-
     if (!result.success) throw new Error(result.error || "Screenshot failed.");
 
     const { screenshots, meta } = result;
@@ -39,14 +56,13 @@ scanBtn.addEventListener("click", async () => {
 
     setProgress(40);
     setStatus(`✅ ${count} screenshot${count > 1 ? "s" : ""} captured. Asking Claude...`);
+    showMeta(
+      meta.capped
+        ? `Page is ${meta.totalHeight}px — scanned ${count} sections (capped at ${count}).`
+        : `Scanned ${count} section${count > 1 ? "s" : ""} · ${meta.totalHeight}px page`
+    );
 
-    if (meta.capped) {
-      showMeta(`Page is ${meta.totalHeight}px tall — scanned ${count} sections (capped at ${count} to stay fast).`);
-    } else {
-      showMeta(`Scanned ${count} section${count > 1 ? "s" : ""} · ${meta.totalHeight}px page height`);
-    }
-
-    // Step 2 — build Claude message with all screenshots
+    // Step 2 — build Claude message
     const imageBlocks = screenshots.map(dataUrl => ({
       type: "image",
       source: {
@@ -69,9 +85,6 @@ scanBtn.addEventListener("click", async () => {
     setProgress(60);
 
     // Step 3 — call Claude API
-    const apiKey = ANTHROPIC_API_KEY || await getStoredKey();
-    if (!apiKey) throw new Error("No API key found. Add ANTHROPIC_API_KEY to popup.js or chrome.storage.");
-
     const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: {
@@ -99,7 +112,7 @@ scanBtn.addEventListener("click", async () => {
       throw new Error(err.error?.message || `API error ${response.status}`);
     }
 
-    const data = await response.json();
+    const data   = await response.json();
     const answer = data.content?.[0]?.text || "No response received.";
 
     setProgress(100);
@@ -114,7 +127,7 @@ scanBtn.addEventListener("click", async () => {
   }
 });
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
+// ── UI helpers ────────────────────────────────────────────────────────────────
 function reset() {
   answerBox.textContent = "";
   answerBox.classList.remove("visible");
@@ -126,13 +139,11 @@ function reset() {
 }
 
 function setBtn(disabled) {
-  scanBtn.disabled = disabled;
+  scanBtn.disabled    = disabled;
   scanBtn.textContent = disabled ? "⏳ Scanning..." : "📸 Scan Page & Ask Claude";
 }
 
-function setStatus(msg) {
-  statusEl.textContent = msg;
-}
+function setStatus(msg)  { statusEl.textContent = msg; }
 
 function setProgress(pct) {
   progressBar.classList.add("visible");
@@ -152,10 +163,4 @@ function showAnswer(text) {
 function showError(msg) {
   errorBox.textContent = "⚠️ " + msg;
   errorBox.classList.add("visible");
-}
-
-async function getStoredKey() {
-  return new Promise(resolve => {
-    chrome.storage.sync.get("apiKey", data => resolve(data.apiKey || ""));
-  });
 }
