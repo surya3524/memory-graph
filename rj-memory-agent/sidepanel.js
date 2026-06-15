@@ -8,6 +8,7 @@ const scanBtn      = document.getElementById("scanBtn");
 const questionEl   = document.getElementById("question");
 const statusEl     = document.getElementById("status");
 const stepsEl      = document.getElementById("steps");
+const filmstrip    = document.getElementById("filmstrip");
 const answerBox    = document.getElementById("answerBox");
 const errorBox     = document.getElementById("errorBox");
 const adminPanel   = document.getElementById("adminPanel");
@@ -54,6 +55,9 @@ chrome.runtime.onMessage.addListener((message) => {
   if (message.action === "agentProgress") {
     addStep(message.step, message.status, message.detail);
   }
+  if (message.action === "agentScreenshot") {
+    addFilmstripFrame(message.data, message.label);
+  }
 });
 
 // ── Main handler ──────────────────────────────────────────────────────────────
@@ -92,8 +96,22 @@ scanBtn.addEventListener("click", async () => {
 function reset() {
   answerBox.innerHTML  = ""; answerBox.classList.remove("visible");
   errorBox.textContent = ""; errorBox.classList.remove("visible");
-  stepsEl.innerHTML    = "";
+  stepsEl.innerHTML    = ""; stepsEl.classList.remove("visible");
   statusEl.textContent = "";
+  filmstrip.innerHTML  = ""; filmstrip.classList.remove("visible");
+}
+
+function addFilmstripFrame(b64data, label) {
+  filmstrip.classList.add("visible");
+  const prev = filmstrip.querySelector(".filmstrip-frame.active");
+  if (prev) prev.classList.remove("active");
+  const frame = document.createElement("div");
+  frame.className = "filmstrip-frame active";
+  frame.innerHTML =
+    `<img src="data:image/jpeg;base64,${b64data}" alt="screenshot"/>` +
+    `<div class="filmstrip-label">${label}</div>`;
+  filmstrip.appendChild(frame);
+  frame.scrollIntoView({ behavior: "smooth", inline: "end" });
 }
 
 function setBtn(disabled) {
@@ -104,6 +122,7 @@ function setBtn(disabled) {
 function setStatus(msg) { statusEl.textContent = msg; }
 
 function addStep(num, status, detail = "") {
+  stepsEl.classList.add("visible");
   const row = document.createElement("div");
   row.className = "step-row";
   row.innerHTML =

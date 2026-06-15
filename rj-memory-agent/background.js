@@ -22,6 +22,11 @@ function sendProgress(step, status, detail = "") {
   chrome.runtime.sendMessage({ action: "agentProgress", step, status, detail }).catch(() => {});
 }
 
+// Send screenshot thumbnail to side panel for visual display
+function sendScreenshot(dataB64, label) {
+  chrome.runtime.sendMessage({ action: "agentScreenshot", data: dataB64, label }).catch(() => {});
+}
+
 // ── Agent loop ────────────────────────────────────────────────────────────────
 async function runAgentLoop(question, apiKey) {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
@@ -96,8 +101,11 @@ async function runAgentLoop(question, apiKey) {
     const screenshot = await captureCurrentView(tab);
     const pageInfo   = await safeSend(tab.id, { action: "getPageHeight" }) || {};
     const scrollPct  = pageInfo.totalHeight > 0
-      ? Math.round((pageInfo.scrollTop / (pageInfo.totalHeight - pageInfo.windowHeight)) * 100)
+      ? Math.round((pageInfo.scrollTop / Math.max(1, pageInfo.totalHeight - pageInfo.windowHeight)) * 100)
       : 0;
+
+    // Send thumbnail to side panel for visual display
+    sendScreenshot(screenshot, `Step ${stepCount} · ${scrollPct}%`);
 
     // Build user turn: screenshot + context
     const userContent = [
