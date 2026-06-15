@@ -1,7 +1,7 @@
 // popup.js
 // Handles UI interactions — sends messages to background.js, renders Claude's response
 
-const ANTHROPIC_API_KEY = "YOUR_API_KEY_HERE"; // Paste your key here for local testing only — never commit a real key
+const ANTHROPIC_API_KEY = ""; // Paste your key here for local testing only — never commit a real key
 const MODEL = "claude-sonnet-4-6";
 const MAX_TOKENS = 1200;
 
