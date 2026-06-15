@@ -70,76 +70,72 @@ scanBtn.addEventListener("click", async () => {
   setStatus("📸 Scanning page...");
 
   try {
-    // Step 1 — background.js injects content.js, scrolls, screenshots
+    // ── PASS 1: Capture initial screenshot for Claude to assess ───────────────
+    setStatus("📸 Taking initial screenshot...");
     const result = await chrome.runtime.sendMessage({ action: "captureFullPage" });
     if (!result.success) throw new Error(result.error || "Screenshot failed.");
 
-    const { screenshots, meta } = result;
-    const count = screenshots.length;
+    const { screenshots: pass1Screenshots, meta } = result;
+    setProgress(25);
+    showMeta(`Page: ${meta.totalHeight}px tall · ${meta.stepsUsed} section${meta.stepsUsed > 1 ? "s" : ""} captured`);
 
-    setProgress(40);
-    setStatus(`✅ ${count} screenshot${count > 1 ? "s" : ""} captured. Asking Claude...`);
-    showMeta(
-      meta.capped
-        ? `Page is ${meta.totalHeight}px — captured ${count} sections (capped at ${count}).`
-        : `Captured ${count} section${count > 1 ? "s" : ""} · ${meta.totalHeight}px page height`
-    );
-
-    // Step 2 — build Claude message with all screenshots in order
-    const imageBlocks = screenshots.map((dataUrl, i) => ({
-      type: "image",
-      source: {
-        type: "base64",
-        media_type: "image/jpeg",
-        data: dataUrl.replace("data:image/jpeg;base64,", ""),
-      },
-    }));
-
-    imageBlocks.push({
+    // ── PASS 1 Claude call: assess what it sees and whether it needs more ─────
+    setStatus("🤔 Claude is assessing the page...");
+    const pass1Blocks = buildImageBlocks(pass1Screenshots);
+    pass1Blocks.push({
       type: "text",
       text:
-        `I am a Raymond James financial advisor. I have shared ${count} screenshot(s) ` +
-        `of a client page, captured top to bottom in order (screenshot 1 = top of page, ` +
-        `screenshot ${count} = bottom of page).\n\n` +
-        `Please read ALL screenshots carefully before answering. Do not miss content ` +
-        `from later screenshots.\n\n` +
-        `Question: "${question}"\n\n` +
-        `Be specific. Use bullet points. Flag anything needing immediate advisor attention.`,
+        `I am a Raymond James financial advisor. I need to answer this question:\n"${question}"\n\n` +
+        `I have shared ${pass1Screenshots.length} screenshot(s) of the page taken top to bottom.\n\n` +
+        `First, tell me in ONE sentence what you can see on this page.\n` +
+        `Then, on a new line starting with NEEDS_MORE: answer YES or NO — do you need to see more of the page to fully answer my question? ` +
+        `(Answer YES if the page appears cut off or if you can only see partial information relevant to the question.)\n` +
+        `Then, on a new line starting with REASON: briefly explain why.`,
     });
 
-    setProgress(65);
+    const assess = await callClaude(stored, pass1Blocks,
+      "You are an AI page assessment assistant. Be brief and direct. Your job is to determine if you have enough visual information to answer the advisor's question.",
+      300
+    );
 
-    // Step 3 — call Claude API
-    const response = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-api-key": stored,
-        "anthropic-version": "2023-06-01",
-        "anthropic-dangerous-direct-browser-access": "true",
-      },
-      body: JSON.stringify({
-        model: MODEL,
-        max_tokens: MAX_TOKENS,
-        system:
-          "You are an AI assistant for Raymond James financial advisors. " +
-          "You receive multiple screenshots of a client page taken top to bottom. " +
-          "Read ALL screenshots — content in later screenshots is just as important. " +
-          "Identify risks, allocation mismatches, follow-up actions, and key insights. " +
-          "Be concise. Lead with the most important finding. Use bullet points.",
-        messages: [{ role: "user", content: imageBlocks }],
-      }),
-    });
+    setProgress(45);
 
-    setProgress(90);
+    const needsMore = /NEEDS_MORE:\s*YES/i.test(assess);
+    let allScreenshots = [...pass1Screenshots];
 
-    if (!response.ok) {
-      const err = await response.json();
-      throw new Error(err.error?.message || `API error ${response.status}`);
+    // ── PASS 2: If Claude says it needs more, do a full scroll capture ────────
+    if (needsMore && meta.totalHeight > meta.windowHeight + 100) {
+      setStatus("🔍 Scrolling to capture full page...");
+      const result2 = await chrome.runtime.sendMessage({ action: "captureFullPage" });
+      if (result2.success) {
+        allScreenshots = result2.screenshots;
+        showMeta(`Full page captured · ${allScreenshots.length} sections · ${meta.totalHeight}px`);
+      }
     }
 
-    const data   = await response.json();
-    const answer = data.content?.[0]?.text || "No response received.";
+    setProgress(65);
+    setStatus(`📖 Reading ${allScreenshots.length} screenshot${allScreenshots.length > 1 ? "s" : ""}...`);
+
+    // ── PASS 2 Claude call: answer the real question with all screenshots ──────
+    const finalBlocks = buildImageBlocks(allScreenshots);
+    finalBlocks.push({
+      type: "text",
+      text:
+        `I am a Raymond James financial advisor. I have shared ${allScreenshots.length} screenshot(s) ` +
+        `of a page, captured top to bottom (screenshot 1 = top, screenshot ${allScreenshots.length} = bottom).\n\n` +
+        `Read ALL screenshots carefully — do not miss content from later screenshots.\n\n` +
+        `Answer this question fully and specifically: "${question}"\n\n` +
+        `Use bullet points. Lead with the most important finding. ` +
+        `Flag anything needing immediate advisor attention.`,
+    });
+
+    const answer = await callClaude(stored, finalBlocks,
+      "You are an AI assistant for Raymond James financial advisors. " +
+      "You receive screenshots of client portfolio or CRM pages. " +
+      "Read ALL screenshots before answering — content near the bottom is as important as the top. " +
+      "Identify risks, allocation issues, and key actions. Be concise and use bullet points.",
+      MAX_TOKENS
+    );
 
     setProgress(100);
     setStatus("✅ Done");
@@ -163,7 +159,7 @@ function reset() {
 
 function setBtn(disabled) {
   scanBtn.disabled    = disabled;
-  scanBtn.textContent = disabled ? "⏳ Scanning..." : "📸 Scan Page & Ask Claude";
+  scanBtn.textContent = disabled ? "⏳ Thinking..." : "Ask";
 }
 
 function setStatus(msg) { statusEl.textContent = msg; }
@@ -192,4 +188,39 @@ function getStoredKey() {
   return new Promise(resolve => {
     chrome.storage.sync.get("apiKey", data => resolve(data.apiKey || ""));
   });
+}
+
+function buildImageBlocks(screenshots) {
+  return screenshots.map(dataUrl => ({
+    type: "image",
+    source: {
+      type: "base64",
+      media_type: "image/jpeg",
+      data: dataUrl.replace("data:image/jpeg;base64,", ""),
+    },
+  }));
+}
+
+async function callClaude(apiKey, contentBlocks, system, maxTokens) {
+  const response = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-api-key": apiKey,
+      "anthropic-version": "2023-06-01",
+      "anthropic-dangerous-direct-browser-access": "true",
+    },
+    body: JSON.stringify({
+      model: MODEL,
+      max_tokens: maxTokens,
+      system,
+      messages: [{ role: "user", content: contentBlocks }],
+    }),
+  });
+  if (!response.ok) {
+    const err = await response.json();
+    throw new Error(err.error?.message || `API error ${response.status}`);
+  }
+  const data = await response.json();
+  return data.content?.[0]?.text || "No response received.";
 }

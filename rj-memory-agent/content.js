@@ -1,7 +1,33 @@
 // content.js — injected into the active page
-// Guard prevents duplicate listeners when injected multiple times
 if (!window.__rjAgentLoaded) {
   window.__rjAgentLoaded = true;
+
+  // Find the real scrollable container — handles Streamlit, standard pages, etc.
+  function getScrollContainer() {
+    // Streamlit-specific containers
+    const streamlitSelectors = [
+      '[data-testid="stAppViewContainer"]',
+      '.main',
+      '[data-testid="stMain"]',
+      '.block-container',
+    ];
+    for (const sel of streamlitSelectors) {
+      const el = document.querySelector(sel);
+      if (el && el.scrollHeight > el.clientHeight + 50) return el;
+    }
+    // Generic: find the element with the most scrollable height
+    const candidates = [document.documentElement, document.body];
+    let best = document.documentElement;
+    for (const el of candidates) {
+      if (el.scrollHeight > best.scrollHeight) best = el;
+    }
+    // If nothing is truly taller than the viewport, fallback to window scroll
+    return best.scrollHeight > window.innerHeight + 50 ? best : null;
+  }
+
+  function scrollContainer() {
+    return getScrollContainer();
+  }
 
   chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
@@ -11,21 +37,28 @@ if (!window.__rjAgentLoaded) {
     }
 
     if (message.action === "getPageHeight") {
-      sendResponse({
-        totalHeight: Math.max(document.body.scrollHeight, document.documentElement.scrollHeight),
-        windowHeight: window.innerHeight,
-      });
+      const container = scrollContainer();
+      const totalHeight  = container ? container.scrollHeight : Math.max(document.body.scrollHeight, document.documentElement.scrollHeight);
+      const windowHeight = container ? container.clientHeight  : window.innerHeight;
+      sendResponse({ totalHeight, windowHeight, usesContainer: !!container });
       return true;
     }
 
     if (message.action === "scrollTo") {
-      window.scrollTo({ top: message.position, behavior: "instant" });
-      setTimeout(() => sendResponse({ done: true, actual: window.scrollY }), message.wait || 400);
+      const container = scrollContainer();
+      if (container) {
+        container.scrollTo({ top: message.position, behavior: "instant" });
+      } else {
+        window.scrollTo({ top: message.position, behavior: "instant" });
+      }
+      setTimeout(() => sendResponse({ done: true, actual: container ? container.scrollTop : window.scrollY }), message.wait || 500);
       return true;
     }
 
     if (message.action === "scrollToTop") {
-      window.scrollTo({ top: 0, behavior: "instant" });
+      const container = scrollContainer();
+      if (container) container.scrollTo({ top: 0, behavior: "instant" });
+      else window.scrollTo({ top: 0, behavior: "instant" });
       setTimeout(() => sendResponse({ done: true }), 200);
       return true;
     }
