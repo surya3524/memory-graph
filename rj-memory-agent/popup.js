@@ -1,7 +1,7 @@
 // popup.js
 // Handles UI interactions — sends messages to background.js, renders Claude's response
 
-const ANTHROPIC_API_KEY = ""; // Set via chrome.storage or paste here for local testing
+const ANTHROPIC_API_KEY = ""; // Paste your key here for local testing only — never commit a real key
 const MODEL = "claude-sonnet-4-6";
 const MAX_TOKENS = 1200;
 
@@ -78,7 +78,7 @@ scanBtn.addEventListener("click", async () => {
         "Content-Type": "application/json",
         "x-api-key": apiKey,
         "anthropic-version": "2023-06-01",
-        "anthropic-dangerous-direct-browser-usage": "true",
+        "anthropic-dangerous-direct-browser-access": "true",
       },
       body: JSON.stringify({
         model: MODEL,
