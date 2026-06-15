@@ -247,19 +247,6 @@ if (!window.__rjAgentLoaded) {
           .rj-corner-tr { animation-delay: 0.2s; }
           .rj-corner-bl { animation-delay: 0.4s; }
           .rj-corner-br { animation-delay: 0.6s; }
-          /* Scan line */
-          #__rj_scanline__ {
-            position: fixed; left: 0; right: 0; height: 2px; z-index: 2147483645;
-            background: linear-gradient(90deg, transparent, #22c55e 40%, #86efac 60%, transparent);
-            pointer-events: none; top: 0;
-            animation: __rj_scan__ 2s linear infinite;
-            box-shadow: 0 0 8px #22c55e;
-          }
-          @keyframes __rj_scan__ {
-            0%   { top: 0; opacity: 1; }
-            90%  { top: calc(100vh - 4px); opacity: 1; }
-            100% { top: calc(100vh - 4px); opacity: 0; }
-          }
         </style>
         <div id="__rj_banner__">
           <span class="rj-logo">RAYMOND JAMES</span>
@@ -274,7 +261,6 @@ if (!window.__rjAgentLoaded) {
         <div class="rj-corner rj-corner-tr"><svg viewBox="0 0 28 28"><path d="M 28 4 L 4 4 L 4 28"/></svg></div>
         <div class="rj-corner rj-corner-bl"><svg viewBox="0 0 28 28"><path d="M 28 4 L 4 4 L 4 28"/></svg></div>
         <div class="rj-corner rj-corner-br"><svg viewBox="0 0 28 28"><path d="M 28 4 L 4 4 L 4 28"/></svg></div>
-        <div id="__rj_scanline__"></div>
       `;
       document.body.appendChild(overlay);
       sendResponse({ done: true });
