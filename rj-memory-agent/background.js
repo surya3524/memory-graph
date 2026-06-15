@@ -50,6 +50,7 @@ async function runAgentLoop(question, apiKey) {
   if (!ping?.alive) return { success: false, error: "Could not connect to page. Try refreshing." };
 
   await chrome.tabs.sendMessage(tab.id, { action: "freezeAnimations" });
+  await safeSend(tab.id, { action: "showAgentOverlay", label: "AI Agent is analyzing this page…" });
 
   const conversationMessages = [];
   let stepCount = 0;
@@ -136,6 +137,7 @@ async function runAgentLoop(question, apiKey) {
     conversationMessages.push({ role: "user", content: userContent });
 
     sendProgress(stepCount, `Step ${stepCount}: Claude is deciding what to do...`);
+    await safeSend(tab.id, { action: "updateAgentOverlay", label: `Step ${stepCount} of ${MAX_STEPS} — AI Agent scanning…` });
 
     // Call Claude with tools
     let response;
@@ -247,6 +249,7 @@ async function callClaudeWithTools(apiKey, system, messages, tools) {
 }
 
 async function cleanup(tabId) {
+  await safeSend(tabId, { action: "hideAgentOverlay" }).catch(() => {});
   await safeSend(tabId, { action: "unfreezeAnimations" }).catch(() => {});
 }
 
