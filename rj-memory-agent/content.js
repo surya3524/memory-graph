@@ -83,16 +83,43 @@ if (!window.__rjAgentLoaded) {
     }
 
     if (message.action === "scrollDown") {
-      const c = getScrollContainer();
-      const amount = message.amount || (c ? c.clientHeight : window.innerHeight) * 0.85;
-      const current = c ? c.scrollTop : window.scrollY;
-      if (c) c.scrollTo({ top: current + amount, behavior: "instant" });
-      else   window.scrollTo({ top: current + amount, behavior: "instant" });
+      const amount = message.amount || window.innerHeight * 0.85;
+
+      // Try every candidate — whichever one's scrollTop actually changes wins
+      const candidates = [
+        document.querySelector('[data-testid="stAppViewBlockContainer"]'),
+        document.querySelector('[data-testid="stAppViewContainer"]'),
+        document.querySelector('[data-testid="stMain"]'),
+        document.querySelector('.main'),
+        document.querySelector('.block-container'),
+        document.documentElement,
+        document.body,
+      ].filter(Boolean);
+
+      let scrolled = false;
+      for (const el of candidates) {
+        const before = el.scrollTop;
+        el.scrollTop += amount;
+        if (el.scrollTop !== before) { scrolled = true; break; }
+      }
+
+      // Also try window scroll as a fallback
+      if (!scrolled) {
+        const before = window.scrollY;
+        window.scrollBy(0, amount);
+        scrolled = window.scrollY !== before;
+      }
+
       setTimeout(() => {
-        const newPos = c ? c.scrollTop : window.scrollY;
-        const totalH = c ? c.scrollHeight : document.documentElement.scrollHeight;
-        const winH   = c ? c.clientHeight  : window.innerHeight;
-        sendResponse({ done: true, atBottom: newPos + winH >= totalH - 20, scrollTop: newPos });
+        // Report position from whichever source has scroll
+        const winY = window.scrollY;
+        const docH = document.documentElement.scrollHeight;
+        sendResponse({
+          done: true,
+          atBottom: winY + window.innerHeight >= docH - 30,
+          scrollTop: winY,
+          scrolled,
+        });
       }, message.wait || 500);
       return true;
     }

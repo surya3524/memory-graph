@@ -44,7 +44,7 @@ async function runAgentLoop(question, apiKey) {
   }
 
   // Inject content script
-  await chrome.scripting.executeScript({ target: { tabId: tab.id }, files: ["content.js"] });
+  await chrome.scripting.executeScript({ target: { tabId: tab.id, allFrames: true }, files: ["content.js"] });
   await sleep(200);
   const ping = await safeSend(tab.id, { action: "ping" });
   if (!ping?.alive) return { success: false, error: "Could not connect to page. Try refreshing." };
