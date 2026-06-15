@@ -178,32 +178,60 @@ if (!window.__rjAgentLoaded) {
       overlay.innerHTML = `
         <style>
           #__rj_overlay__ * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
-          /* Banner */
+          /* Banner — centered floating pill */
           #__rj_banner__ {
-            position: fixed; top: 0; left: 0; right: 0; z-index: 2147483647;
-            background: #003087; color: white;
-            display: flex; align-items: center; gap: 10px;
-            padding: 8px 16px; font-size: 13px; font-weight: 600;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.35);
-            animation: __rj_slidein__ 0.3s ease;
+            position: fixed;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 2147483647;
+            background: rgba(0, 28, 79, 0.92);
+            color: white;
+            display: flex; flex-direction: column; align-items: center; gap: 10px;
+            padding: 22px 32px;
+            border-radius: 16px;
+            border: 1.5px solid #22c55e;
+            font-size: 14px; font-weight: 600;
+            box-shadow: 0 0 32px rgba(34,197,94,0.35), 0 8px 32px rgba(0,0,0,0.5);
+            backdrop-filter: blur(6px);
+            animation: __rj_blink_border__ 1.2s ease-in-out infinite;
+            min-width: 260px; text-align: center;
           }
-          @keyframes __rj_slidein__ { from { transform: translateY(-100%); } to { transform: translateY(0); } }
-          #__rj_banner__ .rj-logo { color: #C8A034; font-weight: 800; letter-spacing: 0.5px; font-size: 12px; }
+          @keyframes __rj_blink_border__ {
+            0%,100% { border-color: #22c55e; box-shadow: 0 0 32px rgba(34,197,94,0.35), 0 8px 32px rgba(0,0,0,0.5); }
+            50%      { border-color: #86efac; box-shadow: 0 0 48px rgba(34,197,94,0.7),  0 8px 32px rgba(0,0,0,0.5); }
+          }
+          #__rj_banner__ .rj-logo {
+            color: #C8A034; font-weight: 800; letter-spacing: 1.5px; font-size: 11px;
+          }
+          #__rj_banner__ .rj-dot-row {
+            display: flex; gap: 6px; align-items: center;
+          }
           #__rj_banner__ .rj-dot {
-            width: 8px; height: 8px; border-radius: 50%; background: #22c55e;
-            animation: __rj_pulse__ 1s ease-in-out infinite;
-            flex-shrink: 0;
+            width: 9px; height: 9px; border-radius: 50%; background: #22c55e;
+            animation: __rj_blink_dot__ 1.2s ease-in-out infinite;
           }
-          @keyframes __rj_pulse__ { 0%,100% { opacity:1; transform:scale(1); } 50% { opacity:0.5; transform:scale(0.7); } }
-          #__rj_banner_text__ { flex: 1; }
+          #__rj_banner__ .rj-dot:nth-child(2) { animation-delay: 0.2s; }
+          #__rj_banner__ .rj-dot:nth-child(3) { animation-delay: 0.4s; }
+          @keyframes __rj_blink_dot__ {
+            0%,100% { opacity: 1;   transform: scale(1); }
+            50%      { opacity: 0.2; transform: scale(0.6); }
+          }
+          #__rj_banner_text__ {
+            font-size: 13px; color: #e2e8f0; font-weight: 500; line-height: 1.4;
+            animation: __rj_blink_text__ 2.4s ease-in-out infinite;
+          }
+          @keyframes __rj_blink_text__ {
+            0%,100% { opacity: 1; }
+            50%      { opacity: 0.6; }
+          }
           /* Corner brackets */
           .rj-corner {
             position: fixed; z-index: 2147483646; width: 28px; height: 28px;
             pointer-events: none;
           }
           .rj-corner svg { width: 100%; height: 100%; }
-          .rj-corner-tl { top: 44px;  left: 8px;  }
-          .rj-corner-tr { top: 44px;  right: 8px; transform: scaleX(-1); }
+          .rj-corner-tl { top: 8px;  left: 8px;  }
+          .rj-corner-tr { top: 8px;  right: 8px; transform: scaleX(-1); }
           .rj-corner-bl { bottom: 8px; left: 8px;  transform: scaleY(-1); }
           .rj-corner-br { bottom: 8px; right: 8px; transform: scale(-1,-1); }
           .rj-corner path {
@@ -218,19 +246,23 @@ if (!window.__rjAgentLoaded) {
           #__rj_scanline__ {
             position: fixed; left: 0; right: 0; height: 2px; z-index: 2147483645;
             background: linear-gradient(90deg, transparent, #22c55e 40%, #86efac 60%, transparent);
-            pointer-events: none; top: 44px;
+            pointer-events: none; top: 0;
             animation: __rj_scan__ 2s linear infinite;
             box-shadow: 0 0 8px #22c55e;
           }
           @keyframes __rj_scan__ {
-            0%   { top: 44px; opacity: 1; }
+            0%   { top: 0; opacity: 1; }
             90%  { top: calc(100vh - 4px); opacity: 1; }
             100% { top: calc(100vh - 4px); opacity: 0; }
           }
         </style>
         <div id="__rj_banner__">
           <span class="rj-logo">RAYMOND JAMES</span>
-          <span class="rj-dot"></span>
+          <div class="rj-dot-row">
+            <span class="rj-dot"></span>
+            <span class="rj-dot"></span>
+            <span class="rj-dot"></span>
+          </div>
           <span id="__rj_banner_text__">${message.label || "AI Agent is analyzing this page…"}</span>
         </div>
         <div class="rj-corner rj-corner-tl"><svg viewBox="0 0 28 28"><path d="M 28 4 L 4 4 L 4 28"/></svg></div>
