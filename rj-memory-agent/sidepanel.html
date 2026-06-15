@@ -7,10 +7,8 @@
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html, body { height: 100%; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #F5F7FA; color: #1A1A2E; }
-
     .layout { display: flex; flex-direction: column; height: 100vh; }
 
-    /* Header */
     .header {
       background: #003087; padding: 14px 18px;
       display: flex; align-items: center; gap: 10px;
@@ -19,19 +17,12 @@
     .header-brand { color: #C8A034; font-size: 16px; font-weight: 800; letter-spacing: 0.5px; }
     .header-sub   { color: rgba(255,255,255,0.6); font-size: 9px; letter-spacing: 1.8px; }
     .header-badge {
-      margin-left: auto;
+      margin-left: auto; cursor: pointer;
       background: #C8A034; color: #003087;
       font-size: 9px; font-weight: 800;
-      padding: 2px 8px; border-radius: 10px;
-    }
-    /* Tiny invisible gear — 3 clicks opens admin panel */
-    .gear-trigger {
-      width: 18px; height: 18px; cursor: pointer;
-      opacity: 0; /* invisible to demo viewers */
-      font-size: 14px; display: flex; align-items: center; justify-content: center;
+      padding: 2px 8px; border-radius: 10px; letter-spacing: 0.5px;
     }
 
-    /* Admin panel — hidden by default */
     .admin-panel {
       background: #0D1525; padding: 12px 18px;
       flex-shrink: 0; display: none;
@@ -39,7 +30,7 @@
     }
     .admin-panel.visible { display: block; }
     .admin-label { font-size: 10px; font-weight: 700; color: #C8A034; letter-spacing: 1px; margin-bottom: 6px; }
-    .key-row { display: flex; gap: 8px; align-items: center; }
+    .key-row { display: flex; gap: 8px; }
     .key-input {
       flex: 1; padding: 7px 10px;
       border: 1.5px solid #1E3A5F; border-radius: 5px;
@@ -49,24 +40,19 @@
     .key-input:focus { border-color: #C8A034; }
     .key-save {
       padding: 7px 12px; background: #C8A034; color: #003087;
-      border: none; border-radius: 5px;
-      font-size: 11px; font-weight: 800; cursor: pointer;
+      border: none; border-radius: 5px; font-size: 11px; font-weight: 800; cursor: pointer;
     }
-    .key-status { font-size: 10px; color: #1A7A3A; margin-top: 5px; display: none; }
-    .key-status.visible { display: block; }
-    .key-indicator {
-      font-size: 10px; color: #1A7A3A; display: none;
-      padding: 4px 0;
-    }
+    .key-status  { font-size: 10px; color: #1A7A3A; margin-top: 5px; display: none; }
+    .key-status.visible  { display: block; }
+    .key-indicator { font-size: 10px; color: #1A7A3A; display: none; padding: 2px 0; }
     .key-indicator.visible { display: block; }
 
-    /* Scrollable body */
-    .body { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+    .body { flex: 1; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 10px; }
 
-    label { display: block; font-size: 10px; font-weight: 700; color: #64748B; letter-spacing: 1px; margin-bottom: 5px; }
+    label { display: block; font-size: 10px; font-weight: 700; color: #64748B; letter-spacing: 1px; margin-bottom: 4px; }
 
     textarea {
-      width: 100%; height: 110px; padding: 10px 12px;
+      width: 100%; height: 90px; padding: 10px 12px;
       border: 1.5px solid #E2E8F0; border-radius: 6px;
       font-size: 13px; resize: vertical; outline: none;
       background: white; color: #1A1A2E; line-height: 1.5;
@@ -75,24 +61,30 @@
     textarea:focus { border-color: #003087; }
 
     .btn {
-      width: 100%; padding: 12px; background: #003087; color: white;
+      width: 100%; padding: 11px; background: #003087; color: white;
       border: none; border-radius: 6px; font-size: 14px; font-weight: 700;
-      cursor: pointer; transition: background 0.15s;
+      cursor: pointer; transition: background 0.15s; letter-spacing: 0.3px;
     }
     .btn:hover:not(:disabled) { background: #004AAD; }
     .btn:disabled { background: #94A3B8; cursor: not-allowed; }
 
-    .progress-bar { height: 4px; background: #E2E8F0; border-radius: 2px; overflow: hidden; display: none; }
-    .progress-bar.visible { display: block; }
-    .progress-fill { height: 100%; background: #003087; border-radius: 2px; transition: width 0.3s ease; }
+    /* Live steps feed */
+    .steps-feed {
+      background: #0D1525; border-radius: 6px;
+      padding: 10px 12px; max-height: 140px; overflow-y: auto;
+      display: none; flex-direction: column; gap: 4px;
+    }
+    .steps-feed.visible { display: flex; }
+    .step-row { font-size: 11px; color: #94A3B8; line-height: 1.4; }
+    .step-row:last-child { color: #C8A034; }
+    .step-detail { color: #64748B; margin-left: 4px; font-size: 10px; }
 
-    .status { font-size: 12px; color: #64748B; min-height: 18px; }
-    .meta   { font-size: 10px; color: #94A3B8; display: none; }
-    .meta.visible { display: block; }
+    .status { font-size: 11px; color: #64748B; min-height: 16px; }
 
     .error-box {
-      background: #FEF2F2; border: 1px solid #FECACA; border-radius: 6px;
-      padding: 10px 12px; font-size: 12px; color: #991B1B; display: none;
+      background: #FEF2F2; border: 1px solid #FECACA;
+      border-radius: 6px; padding: 10px 12px;
+      font-size: 12px; color: #991B1B; display: none;
     }
     .error-box.visible { display: block; }
 
@@ -100,11 +92,14 @@
       flex: 1; background: white;
       border: 1.5px solid #E2E8F0; border-left: 4px solid #003087;
       border-radius: 6px; padding: 14px;
-      font-size: 13px; line-height: 1.65; color: #1A1A2E;
-      white-space: pre-wrap; display: none; overflow-y: auto; min-height: 200px;
+      font-size: 13px; line-height: 1.7; color: #1A1A2E;
+      display: none; overflow-y: auto; min-height: 180px;
     }
     .answer-box.visible { display: block; }
-    .divider { border: none; border-top: 1px solid #E2E8F0; }
+    .answer-box h3 { font-size: 14px; color: #003087; margin: 10px 0 4px; }
+    .answer-box h4 { font-size: 13px; color: #003087; margin: 8px 0 3px; }
+    .answer-box ul { padding-left: 16px; margin: 4px 0; }
+    .answer-box li { margin: 3px 0; }
   </style>
 </head>
 <body>
@@ -118,7 +113,6 @@
     <div class="header-badge" id="gearTrigger">BETA</div>
   </div>
 
-  <!-- Admin panel — only visible after triple-click on gear -->
   <div class="admin-panel" id="adminPanel">
     <div class="admin-label">⚙ DEVELOPER — API KEY</div>
     <div class="key-row">
@@ -129,22 +123,20 @@
   </div>
 
   <div class="body">
-    <!-- Subtle key indicator for developer — hidden from casual viewers -->
     <div class="key-indicator" id="keyIndicator">🔑 API key active</div>
 
     <div>
-      <label>YOUR QUESTION ABOUT THIS PAGE</label>
-      <textarea id="question" placeholder="e.g. Does this client need rebalancing? What risks do you see? Summarize their current allocation."></textarea>
+      <label>YOUR QUESTION</label>
+      <textarea id="question" placeholder="e.g. Given that S&P dropped 5% today, who should I call and draft emails for each client."></textarea>
     </div>
 
     <button class="btn" id="scanBtn">Ask</button>
 
-    <div class="progress-bar" id="progressBar">
-      <div class="progress-fill" id="progressFill" style="width:0%"></div>
-    </div>
-
     <div class="status" id="status"></div>
-    <div class="meta"   id="meta"></div>
+
+    <!-- Live agent step feed -->
+    <div class="steps-feed" id="steps"></div>
+
     <div class="error-box"  id="errorBox"></div>
     <div class="answer-box" id="answerBox"></div>
   </div>
