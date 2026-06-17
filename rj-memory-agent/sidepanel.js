@@ -86,9 +86,11 @@ scanBtn.addEventListener("click", async () => {
   stopBtn.style.display = "none";
 
   if (result?.success) {
+    stepsEl.innerHTML = ""; stepsEl.classList.remove("visible");
     showAnswer(result.answer);
     setStatus(result.stopped ? "🛑 Stopped by user" : "✅ Done");
   } else {
+    stepsEl.innerHTML = ""; stepsEl.classList.remove("visible");
     showError(result?.error || "Something went wrong.");
     setStatus("");
   }
