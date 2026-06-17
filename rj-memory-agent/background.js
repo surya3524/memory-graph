@@ -105,11 +105,12 @@ async function runAgentLoop(question, apiKey) {
   const systemPrompt =
     "You are an AI agent inside a Chrome extension helping a Raymond James financial advisor. " +
     "You can see screenshots of the page and take actions: scroll down, click tabs/buttons, or provide a final answer. " +
-    "IMPORTANT: Always scroll down or click tabs to gather ALL relevant information before answering. " +
-    "If you can see partial information (e.g. only some clients), scroll down to see the rest. " +
-    "If there are tabs on the page (like 'Memory Timeline', 'Note Encoder'), click them if relevant to the question. " +
-    "Only call provide_final_answer when you are confident you have seen everything needed. " +
-    "Be thorough — a financial advisor's decisions depend on complete information.";
+    "IMPORTANT: Only explore what is necessary to answer the question. " +
+    "If the question is about a specific client, focus only on content relevant to that client — do not click other tabs or scroll sections unrelated to the question. " +
+    "If the question requires seeing all clients, scroll down to see the full list. " +
+    "If the question requires a specific tab (like 'Memory Timeline'), click it — but only if it is directly relevant. " +
+    "Never explore tabs or sections speculatively. Answer with what you can see as soon as you have enough information. " +
+    "Be precise and efficient — a financial advisor's time is valuable.";
 
   // ── Main loop ────────────────────────────────────────────────────────────────
   while (stepCount < MAX_STEPS) {

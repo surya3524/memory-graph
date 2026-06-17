@@ -10,6 +10,7 @@ CLIENTS = [
         "name": "John M.",
         "age": 58,
         "archetype": "Regretful Seller",
+        "profile_summary": "Values proactive contact during volatility · Prefers to act on a plan, not emotions",
         "alert_priority": 1,
         "trigger_conditions": ["market_drop_5pct", "market_drop_10pct"],
         "meetings": [
@@ -89,6 +90,7 @@ CLIENTS = [
         "name": "Sarah K.",
         "age": 61,
         "archetype": "Capital Preserver",
+        "profile_summary": "Prioritizes capital preservation · Open to gradual reallocation in stable conditions",
         "alert_priority": 2,
         "trigger_conditions": ["recession_language", "fed_rate_decision", "market_drop_5pct"],
         "meetings": [
@@ -168,6 +170,7 @@ CLIENTS = [
         "name": "Michael T.",
         "age": 55,
         "archetype": "Sector Believer — Semiconductors",
+        "profile_summary": "High conviction in semiconductor sector · Responds well to data-driven rebalancing conversations",
         "alert_priority": 3,
         "trigger_conditions": ["taiwan_strait_news", "china_export_controls", "nvda_earnings_miss", "soxx_drop_10pct"],
         "meetings": [
@@ -247,6 +250,7 @@ CLIENTS = [
         "name": "Robert 'Bobby' H.",
         "age": 63,
         "archetype": "Sector Believer — Oil & Gas",
+        "profile_summary": "Deep familiarity with energy markets · Prefers sector-specific context over broad market commentary",
         "alert_priority": 3,
         "trigger_conditions": ["oil_price_drop_15pct", "energy_policy_news", "opec_decision"],
         "meetings": [
@@ -326,6 +330,7 @@ CLIENTS = [
         "name": "Linda P.",
         "age": 52,
         "archetype": "Inflation Hedge Seeker — Gold & Hard Assets",
+        "profile_summary": "Focused on long-term purchasing power · Values tangible asset exposure as part of overall strategy",
         "alert_priority": 4,
         "trigger_conditions": ["fed_money_printing", "inflation_data_high", "dollar_weakness", "gold_price_drop"],
         "meetings": [
@@ -396,6 +401,7 @@ CLIENTS = [
         "name": "Carol & Jim B.",
         "age": "Jim: 62, Carol: 61",
         "archetype": "Near-Retiree Couple — Divergent Risk Profiles",
+        "profile_summary": "Approaching retirement with different risk outlooks · Best served with separate, tailored conversations",
         "alert_priority": 2,
         "trigger_conditions": ["market_drop_5pct", "recession_news", "within_24mo_of_retirement"],
         "meetings": [
@@ -456,6 +462,7 @@ CLIENTS = [
         "name": "Marcus W.",
         "age": 38,
         "archetype": "Sudden Wealth — Inheritance",
+        "profile_summary": "Navigating a significant life transition · Values stewardship and meaning alongside financial decisions",
         "alert_priority": 5,
         "trigger_conditions": ["market_drop_5pct", "12mo_inaction_flag", "market_rally_10pct"],
         "meetings": [
@@ -519,6 +526,7 @@ CLIENTS = [
         "name": "Priya N.",
         "age": 44,
         "archetype": "DIY Defector — Rebuilding Trust",
+        "profile_summary": "Rebuilding confidence in professional advice · Responds to transparency and evidence-based guidance",
         "alert_priority": 4,
         "trigger_conditions": ["portfolio_underperforms_sp500", "fee_discussion", "market_rally_strong"],
         "meetings": [

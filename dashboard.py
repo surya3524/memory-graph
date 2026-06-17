@@ -243,7 +243,7 @@ with tab1:
                     {icon} {action}
                   </span>
                 </div>
-                <span style="color:#64748B;font-size:13px">{a['archetype']}</span>
+                <span style="color:#64748B;font-size:13px">{a.get('profile_summary','')}</span>
               </div>
               <hr style="margin:10px 0;border-color:#eee">
               <p style="color:#1A1A2E;margin:4px 0"><strong>Why now:</strong><br>{a['alert']['context']}</p>
@@ -259,7 +259,7 @@ with tab1:
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 with tab2:
     st.markdown(f"## {selected_name} — Memory Graph")
-    st.caption(f"Archetype: {selected_data['archetype']}")
+    st.caption(f"{selected_data.get('profile_summary','')}")
 
     sub = get_client_subgraph(G, selected_id)
 
