@@ -155,6 +155,7 @@ function showAnswer(text) {
     .replace(/\n/g, "<br>");
   answerBox.innerHTML = html;
   answerBox.classList.add("visible");
+  setTimeout(() => answerBox.scrollIntoView({ behavior: "smooth", block: "start" }), 100);
 }
 
 function showError(msg) {
