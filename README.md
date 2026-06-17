@@ -3,6 +3,7 @@
 🎬 **Video Demo:** [Watch on Loom](https://www.loom.com/share/8ecc8ab20a4444b48f99c15f5e5a53e7)
 🚀 **Live Demo (stable):** [memorygraphforfas.streamlit.app](https://memorygraphforfas.streamlit.app)
 🧪 **Live Demo (interactive graph):** [memory-graph-v2.streamlit.app](https://memory-graph-v2.streamlit.app)
+✨ **Latest Demo:** [memory-graph-sc-v3.streamlit.app](https://memory-graph-sc-v3.streamlit.app/)
 
 > A living, structured memory layer for every advisor–client relationship —  
 > built for the Raymond James Engineering Challenge 2026.
