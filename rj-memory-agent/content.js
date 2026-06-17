@@ -224,6 +224,49 @@ if (!window.__rjAgentLoaded) {
             0%,100% { opacity: 1; }
             50%      { opacity: 0.6; }
           }
+          /* Bluish page tint */
+          #__rj_tint__ {
+            position: fixed; inset: 0; z-index: 2147483640;
+            background: rgba(14, 40, 100, 0.13);
+            pointer-events: none;
+            animation: __rj_tint_blink__ 2.5s ease-in-out infinite;
+          }
+          @keyframes __rj_tint_blink__ {
+            0%,100% { opacity: 1; }
+            50%      { opacity: 0.4; }
+          }
+          /* Bottom action bar */
+          #__rj_bar__ {
+            position: fixed; bottom: 20px;
+            left: 50%; transform: translateX(-50%);
+            z-index: 2147483647;
+            background: rgba(10, 20, 50, 0.88);
+            border: 1px solid rgba(34,197,94,0.5);
+            border-radius: 999px;
+            padding: 8px 20px;
+            display: flex; align-items: center; gap: 10px;
+            font-size: 13px; color: #e2e8f0; font-weight: 500;
+            backdrop-filter: blur(8px);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.4), 0 0 12px rgba(34,197,94,0.2);
+            white-space: nowrap;
+          }
+          #__rj_bar_icon__ { font-size: 14px; }
+          #__rj_bar_text__ {
+            animation: __rj_bar_fade__ 1.8s ease-in-out infinite;
+          }
+          @keyframes __rj_bar_fade__ {
+            0%,100% { opacity: 1; } 50% { opacity: 0.5; }
+          }
+          #__rj_bar_pulse__ {
+            width: 7px; height: 7px; border-radius: 50%;
+            background: #22c55e;
+            animation: __rj_bar_dot__ 1s ease-in-out infinite;
+            flex-shrink: 0;
+          }
+          @keyframes __rj_bar_dot__ {
+            0%,100% { opacity: 1; transform: scale(1); }
+            50%      { opacity: 0.2; transform: scale(0.5); }
+          }
           /* Corner brackets */
           .rj-corner {
             position: fixed; z-index: 2147483646; width: 28px; height: 28px;
@@ -257,6 +300,12 @@ if (!window.__rjAgentLoaded) {
           </div>
           <span id="__rj_banner_text__">${message.label || "AI Agent is analyzing this page…"}</span>
         </div>
+        <div id="__rj_tint__"></div>
+        <div id="__rj_bar__">
+          <span id="__rj_bar_icon__">🔍</span>
+          <span id="__rj_bar_text__">Agent is reading this page…</span>
+          <span id="__rj_bar_pulse__"></span>
+        </div>
         <div class="rj-corner rj-corner-tl"><svg viewBox="0 0 28 28"><path d="M 28 4 L 4 4 L 4 28"/></svg></div>
         <div class="rj-corner rj-corner-tr"><svg viewBox="0 0 28 28"><path d="M 28 4 L 4 4 L 4 28"/></svg></div>
         <div class="rj-corner rj-corner-bl"><svg viewBox="0 0 28 28"><path d="M 28 4 L 4 4 L 4 28"/></svg></div>
@@ -277,6 +326,16 @@ if (!window.__rjAgentLoaded) {
     if (message.action === "updateAgentOverlay") {
       const lbl = document.getElementById("__rj_banner_text__");
       if (lbl) lbl.textContent = message.label || "";
+      if (message.bar) {
+        const barText = document.getElementById("__rj_bar_text__");
+        const barIcon = document.getElementById("__rj_bar_icon__");
+        if (barText) barText.textContent = message.bar;
+        if (barIcon) {
+          if (message.bar.toLowerCase().includes("scroll")) barIcon.textContent = "⬇️";
+          else if (message.bar.toLowerCase().includes("click")) barIcon.textContent = "🖱️";
+          else barIcon.textContent = "🔍";
+        }
+      }
       sendResponse({ done: true });
       return true;
     }
@@ -285,7 +344,7 @@ if (!window.__rjAgentLoaded) {
       if (!document.getElementById("__rj_freeze__")) {
         const s = document.createElement("style");
         s.id = "__rj_freeze__";
-        s.textContent = "*:not(#__rj_overlay__):not(#__rj_overlay__ *):not(#__rj_banner__):not(#__rj_scanline__):not(.rj-corner):not(.rj-corner *):not(.rj-dot) { animation: none !important; transition: none !important; }";
+        s.textContent = "*:not(#__rj_overlay__):not(#__rj_overlay__ *):not(#__rj_banner__):not(#__rj_tint__):not(#__rj_bar__):not(#__rj_bar__ *):not(.rj-corner):not(.rj-corner *):not(.rj-dot) { animation: none !important; transition: none !important; }";
         document.head.appendChild(s);
       }
       sendResponse({ done: true });

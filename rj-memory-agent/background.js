@@ -153,9 +153,13 @@ async function runAgentLoop(question, apiKey) {
     try {
       response = await callClaudeWithTools(apiKey, systemPrompt, conversationMessages, tools);
     } catch (err) {
-      if (agentShouldStop || err.name === "AbortError") {
+      if (agentShouldStop) {
         await cleanup(tab.id);
         return { success: true, answer: "Agent stopped by user.", stopped: true };
+      }
+      if (err.name === "AbortError") {
+        await cleanup(tab.id);
+        return { success: false, error: "Request timed out. The page may be too complex or the API is slow. Please try again." };
       }
       throw err;
     }
@@ -183,6 +187,7 @@ async function runAgentLoop(question, apiKey) {
 
     if (toolUse.name === "scroll_down") {
       sendProgress(stepCount, "⬇️ Scrolling down...");
+      await safeSend(tab.id, { action: "updateAgentOverlay", label: "AI Agent scanning…", bar: "Scrolling down..." });
       const res = await safeSend(tab.id, { action: "scrollDown", wait: 600 });
       await sleep(700);
       toolResult = res?.atBottom
@@ -200,6 +205,7 @@ async function runAgentLoop(question, apiKey) {
     if (toolUse.name === "click_element") {
       const text = toolUse.input.text;
       sendProgress(stepCount, `🖱️ Clicking "${text}"...`);
+      await safeSend(tab.id, { action: "updateAgentOverlay", label: "AI Agent scanning…", bar: `Clicking "${text}"...` });
       const res = await safeSend(tab.id, { action: "clickElement", text });
       await sleep(900); // wait for page to update after click
       toolResult = res?.success
@@ -231,7 +237,7 @@ async function captureCurrentView(tab) {
 
 async function callClaudeWithTools(apiKey, system, messages, tools) {
   agentAbortController = new AbortController();
-  const timeout = setTimeout(() => agentAbortController.abort(), 30000);
+  const timeout = setTimeout(() => agentAbortController.abort(), 60000);
 
   let response;
   try {
