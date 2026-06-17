@@ -1,5 +1,6 @@
 # Client Financial Memory Graph
 
+🎬 **Video Demo:** [Watch on Loom](https://www.loom.com/share/8ecc8ab20a4444b48f99c15f5e5a53e7)
 🚀 **Live Demo (stable):** [memorygraphforfas.streamlit.app](https://memorygraphforfas.streamlit.app)
 🧪 **Live Demo (interactive graph):** [memory-graph-v2.streamlit.app](https://memory-graph-v2.streamlit.app)
 
