@@ -38,10 +38,14 @@ It just works, every time.
 
 ## Where to Place Each Point in the Submission Portal
 
-### Business Problem — add this sentence after the existing bullet list:
+### Business Problem — add after the existing bullet list:
 > "Even when advisors know what to say, drafting personalized communications at scale
 > takes time they do not have. Generic AI output — one voice for all advisors, all
 > clients — erodes the relationship trust that took years to build."
+>
+> "AI-generated drafts today sound like a generic financial AI — not like the advisor.
+> Clients notice. A communication that does not sound like their advisor erodes the
+> trust the relationship is built on."
 
 ### Proposed Idea — add after the existing graph node + context-aware intelligence section:
 > "A Persona AI layer sits between the advisor's prompt and the AI model. Before
@@ -51,10 +55,25 @@ It just works, every time.
 > specific client. Surya's output leads with numbers and is direct. Jennifer's is
 > warm and relationship-first. Same prompt. Same client data. Completely different
 > voice — because the system learned from their actual past writing."
+>
+> "The result: every AI-generated draft reflects the advisor's personal style —
+> their word choices, their sentence structure, their level of formality — so the
+> advisor spends their time reviewing and approving, not rewriting."
 
 ### Relevance to the Firm — For Advisors section, add:
 > "Every AI draft arrives in the advisor's own voice — reducing the time spent
 > rewriting generic AI output into something that sounds like them."
+>
+> "AI drafts arrive already written in their voice. A data-first advisor gets a draft
+> that leads with numbers. A relationship-first advisor gets one that opens with the
+> client's personal situation. Neither has to rewrite the output to make it sound
+> like themselves."
+
+### Relevance to the Firm — For Clients section, add:
+> "Communications feel personal because they are — every message reflects the
+> specific advisor's style, not a firm-wide AI template. Clients receive the same
+> voice they have come to trust, whether the advisor drafted it in five minutes
+> or five seconds."
 
 ### Relevance to the Firm — For the Firm section, add:
 > "Operationalizes the 'power of personal' strategy as a technology capability,
@@ -62,6 +81,10 @@ It just works, every time.
 > a structured, portable form that persists and improves over time — every
 > communication the advisor approves becomes a new training example that sharpens
 > the persona, and that knowledge persists beyond individual personnel changes."
+>
+> "Scales personalized advisor communication across 8,000+ advisors without
+> standardizing their voice. Each advisor's output remains distinctly theirs
+> at any volume."
 
 ### Implementation — Phase 3 (AI Integration), add bullet:
 > "Deploy Persona AI layer: advisor profile + writing sample injection + client
