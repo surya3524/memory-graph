@@ -59,12 +59,16 @@ It just works, every time.
 ### Relevance to the Firm — For the Firm section, add:
 > "Operationalizes the 'power of personal' strategy as a technology capability,
 > not just a cultural aspiration. Captures each advisor's communication style in
-> a structured, portable form that persists beyond individual personnel changes."
+> a structured, portable form that persists and improves over time — every
+> communication the advisor approves becomes a new training example that sharpens
+> the persona, and that knowledge persists beyond individual personnel changes."
 
 ### Implementation — Phase 3 (AI Integration), add bullet:
 > "Deploy Persona AI layer: advisor profile + writing sample injection + client
-> graph context composition before every LLM call. Human-in-the-loop: advisor
-> reviews every draft before it reaches the client."
+> graph context composition before every LLM call. The advisor profile is not
+> static — it updates continuously as the advisor approves and sends communications,
+> so the persona sharpens over time from their own usage. Human-in-the-loop:
+> advisor reviews every draft before it reaches the client."
 
 ### Risks — add new risk block:
 > **AI Output Quality — Persona Drift**
