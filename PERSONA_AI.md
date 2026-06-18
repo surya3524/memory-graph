@@ -31,7 +31,7 @@ class AdvisorProfile(BaseModel):
     advisor_id: str
     name: str                          # "Surya T. Meesala"
     crd: str                           # "RJ-7832104"
-    branch: str                        # "Las Cruces, NM"
+    branch: str                        # "St. Petersburg, FL"
     specialty: list[str]               # ["Treasury Wires", "HNW clients", "Retirement Planning"]
     communication_style: str           # "data-first, concise, leads with key numbers"
     tone: str                          # "direct and professional, avoids filler phrases"
