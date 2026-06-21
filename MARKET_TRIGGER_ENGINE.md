@@ -25,27 +25,6 @@ https://investor.factset.com/news-releases/news-release-details/raymond-james-se
 
 ---
 
-## How WebSockets Work (Plain English)
-
-A WebSocket is a phone call you open once and leave on.
-
-- **Old way (REST API):** Your server asks "what's the price?" every few seconds.
-  Between asks, the price moved. You missed it.
-- **New way (WebSocket):** One connection stays open permanently. Polygon.io
-  calls you the millisecond the market moves. You don't ask — they tell you.
-
-```
-NYSE trade happens
-      ↓  (microseconds)
-Polygon.io servers
-      ↓  (milliseconds)
-Your open WebSocket connection
-      ↓  (instant)
-Your Python function runs → queries memory graph → generates alert
-```
-
----
-
 ## Two Data Sources Cover All Trigger Scenarios
 
 | Trigger Type | POC Data Source | Production (RJ) |
