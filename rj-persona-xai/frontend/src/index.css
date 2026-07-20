@@ -1,0 +1,30 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --gold:    #FFB81C;
+  --navy:    #003087;
+  --bg:      #060C1A;
+  --card:    #0C1829;
+  --cardHi:  #111F38;
+  --border:  #1A304E;
+  --text:    #D4E6F6;
+  --muted:   #4A7090;
+  --green:   #00C46A;
+  --red:     #FF3B3B;
+  --blue:    #3B9EFF;
+  --orange:  #FF9500;
+  --font: "Inter", system-ui, sans-serif;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 14px;
+  line-height: 1.5;
+  min-height: 100vh;
+}
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--card); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
