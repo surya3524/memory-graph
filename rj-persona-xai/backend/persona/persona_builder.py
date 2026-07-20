@@ -1,4 +1,4 @@
-from .persona_store import get_advisor
+from persona.persona_store import get_advisor
 
 def build_system_prompt(advisor_id: str, client_context: dict) -> str:
     advisor = get_advisor(advisor_id)

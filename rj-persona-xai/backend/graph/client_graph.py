@@ -1,5 +1,5 @@
 import networkx as nx
-from .sample_data import CLIENT_GRAPHS
+from graph.sample_data import CLIENT_GRAPHS
 
 def load_client_graph(client_id: str) -> nx.DiGraph:
     data = CLIENT_GRAPHS.get(client_id)

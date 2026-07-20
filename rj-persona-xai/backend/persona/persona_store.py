@@ -1,4 +1,4 @@
-from ..graph.sample_data import ADVISORS
+from graph.sample_data import ADVISORS
 
 def get_advisor(advisor_id: str) -> dict:
     advisor = ADVISORS.get(advisor_id)
